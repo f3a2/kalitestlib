@@ -1403,17 +1403,21 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     BackgroundColor3 = DROPDOWN_BACKGROUND,
                     ClipsDescendants = true,
                     Visible = false,
-                    ZIndex = 100, -- Very high Z-index to ensure it's on top
-                    Parent = DropdownButton -- Parent to the button for proper positioning
+                    ZIndex = 9999, -- Extremely high Z-index to ensure it's on top of everything
+                    Parent = CoreGui -- Parent directly to CoreGui instead of the dropdown button
                 })
                 createRoundedCorner(DropdownMenu, 4)
                 createStroke(DropdownMenu, Color3.fromRGB(50, 50, 50), 1, 0)
-                
+
+                -- Store reference to the dropdown button for positioning
+                local dropdownButtonRef = DropdownButton
+
+                -- Update the dropdown list and its children to have extremely high Z-index
                 local DropdownList = createInstance("Frame", {
                     Name = "List",
                     Size = UDim2.new(1, 0, 1, 0),
                     BackgroundTransparency = 1,
-                    ZIndex = 100,
+                    ZIndex = 9999,
                     Parent = DropdownMenu
                 })
                 
@@ -1434,17 +1438,29 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 local isOpen = false
                 local selectedItem = default
                 
+                -- Update the updateDropdown function to properly position the menu
                 local function updateDropdown()
                     isOpen = not isOpen
                     
                     if isOpen then
+                        -- Position the menu at the dropdown button's position
+                        DropdownMenu.Position = UDim2.new(
+                            0, 
+                            dropdownButtonRef.AbsolutePosition.X,
+                            0, 
+                            dropdownButtonRef.AbsolutePosition.Y + dropdownButtonRef.AbsoluteSize.Y + 5
+                        )
+                        DropdownMenu.Size = UDim2.new(0, dropdownButtonRef.AbsoluteSize.X, 0, 0)
                         DropdownMenu.Visible = true
+                        
+                        -- Animate the menu opening
                         local menuHeight = math.min(#items * 30, 150)
-                        DropdownMenu.Size = UDim2.new(1, 0, 0, menuHeight)
-                        DropdownArrow.Rotation = 180
+                        createTween(DropdownMenu, {Size = UDim2.new(0, dropdownButtonRef.AbsoluteSize.X, 0, menuHeight)}):Play()
+                        createTween(DropdownArrow, {Rotation = 180}):Play()
                     else
-                        DropdownMenu.Size = UDim2.new(1, 0, 0, 0)
-                        DropdownArrow.Rotation = 0
+                        -- Animate the menu closing
+                        createTween(DropdownMenu, {Size = UDim2.new(0, dropdownButtonRef.AbsoluteSize.X, 0, 0)}):Play()
+                        createTween(DropdownArrow, {Rotation = 0}):Play()
                         
                         delay(0.2, function()
                             if not isOpen then
@@ -1464,7 +1480,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                         TextColor3 = item == selectedItem and ACCENT_COLOR or SECONDARY_TEXT_COLOR,
                         TextSize = 14,
                         Font = Enum.Font.Gotham,
-                        ZIndex = 101,
+                        ZIndex = 10000, -- Even higher Z-index for the buttons
                         Parent = DropdownList
                     })
                     createRoundedCorner(ItemButton, 4)
@@ -1514,11 +1530,17 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 -- Close dropdown when clicking elsewhere
                 UserInputService.InputBegan:Connect(function(input)
                     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        local mousePos = UserInputService:GetMouseLocation()
                         if isOpen and not (
-                            input.Position.X >= DropdownButton.AbsolutePosition.X and
-                            input.Position.X <= DropdownButton.AbsolutePosition.X + DropdownButton.AbsoluteSize.X and
-                            input.Position.Y >= DropdownButton.AbsolutePosition.Y and
-                            input.Position.Y <= DropdownButton.AbsolutePosition.Y + DropdownMenu.AbsoluteSize.Y + DropdownButton.AbsoluteSize.Y
+                            mousePos.X >= DropdownMenu.AbsolutePosition.X and
+                            mousePos.X <= DropdownMenu.AbsolutePosition.X + DropdownMenu.AbsoluteSize.X and
+                            mousePos.Y >= DropdownMenu.AbsolutePosition.Y and
+                            mousePos.Y <= DropdownMenu.AbsolutePosition.Y + DropdownMenu.AbsoluteSize.Y
+                        ) and not (
+                            mousePos.X >= dropdownButtonRef.AbsolutePosition.X and
+                            mousePos.X <= dropdownButtonRef.AbsolutePosition.X + dropdownButtonRef.AbsoluteSize.X and
+                            mousePos.Y >= dropdownButtonRef.AbsolutePosition.Y and
+                            mousePos.Y <= dropdownButtonRef.AbsolutePosition.Y + dropdownButtonRef.AbsoluteSize.Y
                         ) then
                             updateDropdown()
                         end
