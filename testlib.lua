@@ -6,12 +6,14 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local TextService = game:GetService("TextService")
+local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
 
 -- Variables
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local ViewportSize = workspace.CurrentCamera.ViewportSize
+local IsMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 
 -- Constants
 local BACKGROUND_COLOR = Color3.fromRGB(20, 20, 20)
@@ -26,6 +28,13 @@ local SLIDER_FILL = Color3.fromRGB(114, 111, 255)
 local DROPDOWN_BACKGROUND = Color3.fromRGB(30, 30, 30)
 local BUTTON_COLOR = Color3.fromRGB(40, 40, 40)
 local BUTTON_HOVER_COLOR = Color3.fromRGB(50, 50, 50)
+local INPUT_BACKGROUND = Color3.fromRGB(30, 30, 30)
+
+-- Configuration
+local ConfigSystem = {
+    Folder = "UILibrary",
+    Extension = ".config"
+}
 
 -- Utility Functions
 local function createInstance(className, properties)
@@ -64,8 +73,696 @@ local function createStroke(parent, color, thickness, transparency)
     return stroke
 end
 
+local function makeOnlyTopDraggable(frame, dragArea)
+    local isDragging = false
+    local dragInput
+    local dragStart
+    local startPos
+    
+    dragArea.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            isDragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    isDragging = false
+                end
+            end)
+        end
+    end)
+    
+    dragArea.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and isDragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- Color Picker Functions
+local function createColorPicker(parent, defaultColor, callback)
+    local ColorPickerGui = createInstance("Frame", {
+        Name = "ColorPickerGui",
+        Size = UDim2.new(0, 200, 0, 220),
+        Position = UDim2.new(1, 10, 0, 0),
+        BackgroundColor3 = BACKGROUND_COLOR,
+        BorderSizePixel = 0,
+        Visible = false,
+        ZIndex = 10,
+        Parent = parent
+    })
+    createRoundedCorner(ColorPickerGui, 6)
+    
+    local ColorPickerTitle = createInstance("TextLabel", {
+        Name = "Title",
+        Size = UDim2.new(1, 0, 0, 30),
+        BackgroundTransparency = 1,
+        Text = "Color Picker",
+        TextColor3 = TEXT_COLOR,
+        TextSize = 14,
+        Font = Enum.Font.GothamSemibold,
+        ZIndex = 10,
+        Parent = ColorPickerGui
+    })
+    
+    -- Create the hue slider
+    local HueFrame = createInstance("Frame", {
+        Name = "HueFrame",
+        Size = UDim2.new(1, -20, 0, 20),
+        Position = UDim2.new(0, 10, 0, 140),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        BorderSizePixel = 0,
+        ZIndex = 10,
+        Parent = ColorPickerGui
+    })
+    createRoundedCorner(HueFrame, 4)
+    
+    -- Create the hue gradient
+    local HueGradient = createInstance("UIGradient", {
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),
+            ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+            ColorSequenceKeypoint.new(0.667, Color3.fromRGB(0, 0, 255)),
+            ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+        }),
+        Parent = HueFrame
+    })
+    
+    local HueSelector = createInstance("Frame", {
+        Name = "HueSelector",
+        Size = UDim2.new(0, 4, 1, 0),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        BorderSizePixel = 0,
+        ZIndex = 11,
+        Parent = HueFrame
+    })
+    createRoundedCorner(HueSelector, 2)
+    
+    -- Create the saturation/value picker
+    local SVFrame = createInstance("Frame", {
+        Name = "SVFrame",
+        Size = UDim2.new(1, -20, 0, 100),
+        Position = UDim2.new(0, 10, 0, 35),
+        BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+        BorderSizePixel = 0,
+        ZIndex = 10,
+        Parent = ColorPickerGui
+    })
+    createRoundedCorner(SVFrame, 4)
+    
+    -- Create the saturation gradient (white to color)
+    local SaturationGradient = createInstance("UIGradient", {
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
+        }),
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 0)
+        }),
+        Rotation = 90,
+        Parent = SVFrame
+    })
+    
+    -- Create the value gradient (transparent to black)
+    local ValueFrame = createInstance("Frame", {
+        Name = "ValueFrame",
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundTransparency = 0,
+        BorderSizePixel = 0,
+        ZIndex = 11,
+        Parent = SVFrame
+    })
+    createRoundedCorner(ValueFrame, 4)
+    
+    local ValueGradient = createInstance("UIGradient", {
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+        }),
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(1, 0)
+        }),
+        Rotation = 0,
+        Parent = ValueFrame
+    })
+    
+    local SVSelector = createInstance("Frame", {
+        Name = "SVSelector",
+        Size = UDim2.new(0, 10, 0, 10),
+        Position = UDim2.new(1, -5, 0, -5),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        BorderSizePixel = 0,
+        ZIndex = 12,
+        Parent = SVFrame
+    })
+    createRoundedCorner(SVSelector, 10)
+    createStroke(SVSelector, Color3.fromRGB(0, 0, 0), 1, 0)
+    
+    -- Create RGB input fields
+    local RGBFrame = createInstance("Frame", {
+        Name = "RGBFrame",
+        Size = UDim2.new(1, -20, 0, 25),
+        Position = UDim2.new(0, 10, 0, 170),
+        BackgroundTransparency = 1,
+        ZIndex = 10,
+        Parent = ColorPickerGui
+    })
+    
+    local RInput = createInstance("TextBox", {
+        Name = "RInput",
+        Size = UDim2.new(0, 40, 0, 25),
+        Position = UDim2.new(0, 0, 0, 0),
+        BackgroundColor3 = INPUT_BACKGROUND,
+        Text = "255",
+        TextColor3 = TEXT_COLOR,
+        PlaceholderText = "R",
+        TextSize = 12,
+        Font = Enum.Font.Gotham,
+        ClearTextOnFocus = false,
+        ZIndex = 10,
+        Parent = RGBFrame
+    })
+    createRoundedCorner(RInput, 4)
+    
+    local GInput = createInstance("TextBox", {
+        Name = "GInput",
+        Size = UDim2.new(0, 40, 0, 25),
+        Position = UDim2.new(0, 45, 0, 0),
+        BackgroundColor3 = INPUT_BACKGROUND,
+        Text = "0",
+        TextColor3 = TEXT_COLOR,
+        PlaceholderText = "G",
+        TextSize = 12,
+        Font = Enum.Font.Gotham,
+        ClearTextOnFocus = false,
+        ZIndex = 10,
+        Parent = RGBFrame
+    })
+    createRoundedCorner(GInput, 4)
+    
+    local BInput = createInstance("TextBox", {
+        Name = "BInput",
+        Size = UDim2.new(0, 40, 0, 25),
+        Position = UDim2.new(0, 90, 0, 0),
+        BackgroundColor3 = INPUT_BACKGROUND,
+        Text = "0",
+        TextColor3 = TEXT_COLOR,
+        PlaceholderText = "B",
+        TextSize = 12,
+        Font = Enum.Font.Gotham,
+        ClearTextOnFocus = false,
+        ZIndex = 10,
+        Parent = RGBFrame
+    })
+    createRoundedCorner(BInput, 4)
+    
+    local HexInput = createInstance("TextBox", {
+        Name = "HexInput",
+        Size = UDim2.new(0, 60, 0, 25),
+        Position = UDim2.new(0, 135, 0, 0),
+        BackgroundColor3 = INPUT_BACKGROUND,
+        Text = "#FF0000",
+        TextColor3 = TEXT_COLOR,
+        PlaceholderText = "Hex",
+        TextSize = 12,
+        Font = Enum.Font.Gotham,
+        ClearTextOnFocus = false,
+        ZIndex = 10,
+        Parent = RGBFrame
+    })
+    createRoundedCorner(HexInput, 4)
+    
+    -- Variables for color picking
+    local hue, sat, val = 0, 1, 1
+    local selectedColor = defaultColor or Color3.fromRGB(255, 0, 0)
+    
+    -- Function to update the color display
+    local function updateColor()
+        -- Convert HSV to RGB
+        local h, s, v = hue, sat, val
+        local r, g, b
+        
+        local i = math.floor(h * 6)
+        local f = h * 6 - i
+        local p = v * (1 - s)
+        local q = v * (1 - f * s)
+        local t = v * (1 - (1 - f) * s)
+        
+        i = i % 6
+        
+        if i == 0 then r, g, b = v, t, p
+        elseif i == 1 then r, g, b = q, v, p
+        elseif i == 2 then r, g, b = p, v, t
+        elseif i == 3 then r, g, b = p, q, v
+        elseif i == 4 then r, g, b = t, p, v
+        elseif i == 5 then r, g, b = v, p, q
+        end
+        
+        selectedColor = Color3.fromRGB(r * 255, g * 255, b * 255)
+        
+        -- Update the SV frame color based on hue
+        SVFrame.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+        
+        -- Update RGB inputs
+        RInput.Text = tostring(math.floor(selectedColor.R * 255))
+        GInput.Text = tostring(math.floor(selectedColor.G * 255))
+        BInput.Text = tostring(math.floor(selectedColor.B * 255))
+        
+        -- Update Hex input
+        local hexR = string.format("%02X", math.floor(selectedColor.R * 255))
+        local hexG = string.format("%02X", math.floor(selectedColor.G * 255))
+        local hexB = string.format("%02X", math.floor(selectedColor.B * 255))
+        HexInput.Text = "#" .. hexR .. hexG .. hexB
+        
+        -- Call the callback with the new color
+        if callback then
+            callback(selectedColor)
+        end
+    end
+    
+    -- Function to set the color from RGB values
+    local function setColorFromRGB(r, g, b)
+        r, g, b = r / 255, g / 255, b / 255
+        
+        local max = math.max(r, g, b)
+        local min = math.min(r, g, b)
+        local delta = max - min
+        
+        -- Calculate value
+        val = max
+        
+        -- Calculate saturation
+        if max == 0 then
+            sat = 0
+        else
+            sat = delta / max
+        end
+        
+        -- Calculate hue
+        if delta == 0 then
+            hue = 0
+        elseif max == r then
+            hue = ((g - b) / delta) % 6
+        elseif max == g then
+            hue = (b - r) / delta + 2
+        else
+            hue = (r - g) / delta + 4
+        end
+        
+        hue = hue / 6
+        
+        -- Update selector positions
+        HueSelector.Position = UDim2.new(hue, -2, 0, 0)
+        SVSelector.Position = UDim2.new(sat, 0, 1 - val, 0)
+        
+        updateColor()
+    end
+    
+    -- Function to set the color from hex value
+    local function setColorFromHex(hex)
+        hex = hex:gsub("#", "")
+        
+        if #hex == 3 then
+            hex = hex:sub(1, 1) .. hex:sub(1, 1) .. hex:sub(2, 2) .. hex:sub(2, 2) .. hex:sub(3, 3) .. hex:sub(3, 3)
+        end
+        
+        if #hex ~= 6 then
+            return
+        end
+        
+        local r = tonumber(hex:sub(1, 2), 16) or 0
+        local g = tonumber(hex:sub(3, 4), 16) or 0
+        local b = tonumber(hex:sub(5, 6), 16) or 0
+        
+        setColorFromRGB(r, g, b)
+    end
+    
+    -- Set initial color
+    setColorFromRGB(
+        math.floor(defaultColor.R * 255),
+        math.floor(defaultColor.G * 255),
+        math.floor(defaultColor.B * 255)
+    )
+    
+    -- Hue slider interaction
+    local hueDragging = false
+    
+    HueFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            hueDragging = true
+            
+            local relativeX = math.clamp((input.Position.X - HueFrame.AbsolutePosition.X) / HueFrame.AbsoluteSize.X, 0, 1)
+            hue = relativeX
+            
+            HueSelector.Position = UDim2.new(relativeX, -2, 0, 0)
+            updateColor()
+        end
+    end)
+    
+    HueFrame.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            hueDragging = false
+        end
+    end)
+    
+    HueFrame.InputChanged:Connect(function(input)
+        if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and hueDragging then
+            local relativeX = math.clamp((input.Position.X - HueFrame.AbsolutePosition.X) / HueFrame.AbsoluteSize.X, 0, 1)
+            hue = relativeX
+            
+            HueSelector.Position = UDim2.new(relativeX, -2, 0, 0)
+            updateColor()
+        end
+    end)
+    
+    -- SV picker interaction
+    local svDragging = false
+    
+    SVFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            svDragging = true
+            
+            local relativeX = math.clamp((input.Position.X - SVFrame.AbsolutePosition.X) / SVFrame.AbsoluteSize.X, 0, 1)
+            local relativeY = math.clamp((input.Position.Y - SVFrame.AbsolutePosition.Y) / SVFrame.AbsoluteSize.Y, 0, 1)
+            
+            sat = relativeX
+            val = 1 - relativeY
+            
+            SVSelector.Position = UDim2.new(relativeX, 0, relativeY, 0)
+            updateColor()
+        end
+    end)
+    
+    SVFrame.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            svDragging = false
+        end
+    end)
+    
+    SVFrame.InputChanged:Connect(function(input)
+        if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and svDragging then
+            local relativeX = math.clamp((input.Position.X - SVFrame.AbsolutePosition.X) / SVFrame.AbsoluteSize.X, 0, 1)
+            local relativeY = math.clamp((input.Position.Y - SVFrame.AbsolutePosition.Y) / SVFrame.AbsoluteSize.Y, 0, 1)
+            
+            sat = relativeX
+            val = 1 - relativeY
+            
+            SVSelector.Position = UDim2.new(relativeX, 0, relativeY, 0)
+            updateColor()
+        end
+    end)
+    
+    -- RGB input handling
+    RInput.FocusLost:Connect(function()
+        local r = tonumber(RInput.Text) or 0
+        r = math.clamp(r, 0, 255)
+        
+        local g = tonumber(GInput.Text) or 0
+        local b = tonumber(BInput.Text) or 0
+        
+        setColorFromRGB(r, g, b)
+    end)
+    
+    GInput.FocusLost:Connect(function()
+        local g = tonumber(GInput.Text) or 0
+        g = math.clamp(g, 0, 255)
+        
+        local r = tonumber(RInput.Text) or 0
+        local b = tonumber(BInput.Text) or 0
+        
+        setColorFromRGB(r, g, b)
+    end)
+    
+    BInput.FocusLost:Connect(function()
+        local b = tonumber(BInput.Text) or 0
+        b = math.clamp(b, 0, 255)
+        
+        local r = tonumber(RInput.Text) or 0
+        local g = tonumber(GInput.Text) or 0
+        
+        setColorFromRGB(r, g, b)
+    end)
+    
+    -- Hex input handling
+    HexInput.FocusLost:Connect(function()
+        local hex = HexInput.Text
+        setColorFromHex(hex)
+    end)
+    
+    return {
+        Gui = ColorPickerGui,
+        SetColor = function(color)
+            setColorFromRGB(
+                math.floor(color.R * 255),
+                math.floor(color.G * 255),
+                math.floor(color.B * 255)
+            )
+        end,
+        GetColor = function()
+            return selectedColor
+        end
+    }
+end
+
+-- Configuration System Functions
+local function saveConfig(name, data)
+    if not isfolder(ConfigSystem.Folder) then
+        makefolder(ConfigSystem.Folder)
+    end
+    
+    local success, encodedData = pcall(function()
+        return HttpService:JSONEncode(data)
+    end)
+    
+    if success then
+        writefile(ConfigSystem.Folder .. "/" .. name .. ConfigSystem.Extension, encodedData)
+        return true
+    else
+        warn("Failed to save config: " .. tostring(encodedData))
+        return false
+    end
+end
+
+local function loadConfig(name)
+    local path = ConfigSystem.Folder .. "/" .. name .. ConfigSystem.Extension
+    
+    if isfile(path) then
+        local success, decodedData = pcall(function()
+            return HttpService:JSONDecode(readfile(path))
+        end)
+        
+        if success then
+            return decodedData
+        else
+            warn("Failed to load config: " .. tostring(decodedData))
+            return nil
+        end
+    else
+        return nil
+    end
+end
+
+local function getConfigList()
+    if not isfolder(ConfigSystem.Folder) then
+        makefolder(ConfigSystem.Folder)
+        return {}
+    end
+    
+    local files = listfiles(ConfigSystem.Folder)
+    local configs = {}
+    
+    for _, file in ipairs(files) do
+        local fileName = string.match(file, "[^/\\]+$")
+        if string.sub(fileName, -#ConfigSystem.Extension) == ConfigSystem.Extension then
+            table.insert(configs, string.sub(fileName, 1, -#ConfigSystem.Extension - 1))
+        end
+    end
+    
+    return configs
+end
+
+-- Key System Functions
+local function fetchKey(url)
+    local success, result = pcall(function()
+        return game:HttpGet(url)
+    end)
+    
+    if success then
+        return string.gsub(result, "%s+", "")
+    else
+        warn("Failed to fetch key: " .. tostring(result))
+        return nil
+    end
+end
+
 -- Main Library Functions
-function UILibrary:CreateWindow(title)
+function UILibrary:CreateWindow(title, keySystemOptions)
+    -- Key System Check
+    if keySystemOptions and keySystemOptions.Enabled then
+        -- Create key system UI
+        local KeySystemGui = createInstance("ScreenGui", {
+            Name = "KeySystem",
+            Parent = CoreGui,
+            ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+            ResetOnSpawn = false
+        })
+        
+        local KeyFrame = createInstance("Frame", {
+            Name = "KeyFrame",
+            Size = UDim2.new(0, 300, 0, 200),
+            Position = UDim2.new(0.5, -150, 0.5, -100),
+            BackgroundColor3 = BACKGROUND_COLOR,
+            BorderSizePixel = 0,
+            Parent = KeySystemGui
+        })
+        createRoundedCorner(KeyFrame, 6)
+        
+        local KeyTitle = createInstance("TextLabel", {
+            Name = "KeyTitle",
+            Size = UDim2.new(1, 0, 0, 40),
+            BackgroundTransparency = 1,
+            Text = "Key System",
+            TextColor3 = TEXT_COLOR,
+            TextSize = 18,
+            Font = Enum.Font.GothamBold,
+            Parent = KeyFrame
+        })
+        
+        local KeyDescription = createInstance("TextLabel", {
+            Name = "KeyDescription",
+            Size = UDim2.new(1, -40, 0, 40),
+            Position = UDim2.new(0, 20, 0, 40),
+            BackgroundTransparency = 1,
+            Text = keySystemOptions.Note or "Please enter the key to continue",
+            TextColor3 = SECONDARY_TEXT_COLOR,
+            TextSize = 14,
+            TextWrapped = true,
+            Font = Enum.Font.Gotham,
+            Parent = KeyFrame
+        })
+        
+        local KeyInput = createInstance("TextBox", {
+            Name = "KeyInput",
+            Size = UDim2.new(1, -40, 0, 40),
+            Position = UDim2.new(0, 20, 0, 90),
+            BackgroundColor3 = INPUT_BACKGROUND,
+            Text = "",
+            PlaceholderText = "Enter key here...",
+            TextColor3 = TEXT_COLOR,
+            PlaceholderColor3 = SECONDARY_TEXT_COLOR,
+            TextSize = 14,
+            Font = Enum.Font.Gotham,
+            ClearTextOnFocus = false,
+            Parent = KeyFrame
+        })
+        createRoundedCorner(KeyInput, 4)
+        
+        local SubmitButton = createInstance("TextButton", {
+            Name = "SubmitButton",
+            Size = UDim2.new(1, -40, 0, 40),
+            Position = UDim2.new(0, 20, 0, 140),
+            BackgroundColor3 = ACCENT_COLOR,
+            Text = "Submit",
+            TextColor3 = TEXT_COLOR,
+            TextSize = 14,
+            Font = Enum.Font.GothamSemibold,
+            Parent = KeyFrame
+        })
+        createRoundedCorner(SubmitButton, 4)
+        
+        local StatusLabel = createInstance("TextLabel", {
+            Name = "StatusLabel",
+            Size = UDim2.new(1, 0, 0, 20),
+            Position = UDim2.new(0, 0, 1, -20),
+            BackgroundTransparency = 1,
+            Text = "",
+            TextColor3 = Color3.fromRGB(255, 100, 100),
+            TextSize = 12,
+            Font = Enum.Font.Gotham,
+            Parent = KeyFrame
+        })
+        
+        -- Make key frame draggable
+        makeOnlyTopDraggable(KeyFrame, KeyTitle)
+        
+        -- Fetch the key from the URL
+        local correctKey = nil
+        
+        if keySystemOptions.KeyURL then
+            spawn(function()
+                StatusLabel.Text = "Fetching key..."
+                correctKey = fetchKey(keySystemOptions.KeyURL)
+                if correctKey then
+                    StatusLabel.Text = "Key fetched successfully"
+                    StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+                else
+                    StatusLabel.Text = "Failed to fetch key"
+                    StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+                end
+                wait(2)
+                StatusLabel.Text = ""
+            end)
+        else
+            correctKey = keySystemOptions.Key
+        end
+        
+        -- Key validation
+        local keyValidated = false
+        
+        local function validateKey()
+            if not correctKey then
+                StatusLabel.Text = "Key not available yet, try again"
+                StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+                wait(2)
+                StatusLabel.Text = ""
+                return
+            end
+            
+            if KeyInput.Text == correctKey then
+                keyValidated = true
+                StatusLabel.Text = "Key validated successfully!"
+                StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+                wait(1)
+                KeySystemGui:Destroy()
+                return true
+            else
+                StatusLabel.Text = "Invalid key, please try again"
+                StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+                wait(2)
+                StatusLabel.Text = ""
+                return false
+            end
+        end
+        
+        SubmitButton.MouseButton1Click:Connect(function()
+            validateKey()
+        end)
+        
+        KeyInput.FocusLost:Connect(function(enterPressed)
+            if enterPressed then
+                validateKey()
+            end
+        end)
+        
+        -- Wait for key validation
+        repeat wait() until keyValidated
+    end
+    
     -- Check if a UI already exists and remove it
     if CoreGui:FindFirstChild("UILibrary") then
         CoreGui:FindFirstChild("UILibrary"):Destroy()
@@ -86,7 +783,8 @@ function UILibrary:CreateWindow(title)
         Position = UDim2.new(0.5, -350, 0.5, -250),
         BackgroundColor3 = BACKGROUND_COLOR,
         BorderSizePixel = 0,
-        Parent = UILibraryGui
+        Parent = UILibraryGui,
+        Visible = true
     })
     createRoundedCorner(MainFrame, 6)
     
@@ -269,46 +967,37 @@ function UILibrary:CreateWindow(title)
         Parent = BottomBar
     })
     
-    -- Make the UI draggable
-    local isDragging = false
-    local dragInput
-    local dragStart
-    local startPos
-    
-    local function updateDrag(input)
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    -- Create mobile toggle button
+    local MobileToggle
+    if IsMobile then
+        MobileToggle = createInstance("ImageButton", {
+            Name = "MobileToggle",
+            Size = UDim2.new(0, 40, 0, 40),
+            Position = UDim2.new(0, 10, 0, 10),
+            BackgroundColor3 = BACKGROUND_COLOR,
+            Image = "rbxassetid://6031094670",
+            ImageColor3 = ACCENT_COLOR,
+            Parent = UILibraryGui
+        })
+        createRoundedCorner(MobileToggle, 8)
+        createStroke(MobileToggle, ACCENT_COLOR, 2, 0)
+        
+        -- Make mobile toggle draggable
+        makeOnlyTopDraggable(MobileToggle, MobileToggle)
+        
+        MobileToggle.MouseButton1Click:Connect(function()
+            MainFrame.Visible = not MainFrame.Visible
+        end)
     end
     
-    MainFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = true
-            dragStart = input.Position
-            startPos = MainFrame.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    isDragging = false
-                end
-            end)
-        end
-    end)
-    
-    MainFrame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and isDragging then
-            updateDrag(input)
-        end
-    end)
+    -- Make only the top part of the UI draggable
+    makeOnlyTopDraggable(MainFrame, TopBar)
+    makeOnlyTopDraggable(MainFrame, SidebarTitle)
     
     -- Tab system
     local Tabs = {}
     local SelectedTab = nil
+    local UIElements = {}
     
     local Window = {}
     
@@ -379,7 +1068,7 @@ function UILibrary:CreateWindow(title)
         
         -- Tab selection logic
         TabButton.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 if SelectedTab then
                     -- Deselect current tab
                     createTween(Tabs[SelectedTab].ButtonBackground, {BackgroundTransparency = 1}):Play()
@@ -538,21 +1227,31 @@ function UILibrary:CreateWindow(title)
                 end
                 
                 ToggleButton.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         updateToggle()
                     end
                 end)
                 
-                return {
-                    Set = function(newState)
-                        if state ~= newState then
-                            updateToggle()
-                        end
-                    end,
+                -- Register UI element for config saving
+                local toggleElement = {
+                    Type = "Toggle",
+                    Name = toggleName,
+                    Section = sectionName,
+                    Tab = name,
                     Get = function()
                         return state
+                    end,
+                    Set = function(value)
+                        if state ~= value then
+                            state = not state -- We need to flip it because updateToggle will flip it again
+                            updateToggle()
+                        end
                     end
                 }
+                
+                table.insert(UIElements, toggleElement)
+                
+                return toggleElement
             end
             
             function SectionObj:CreateSlider(sliderName, options, callback)
@@ -645,7 +1344,7 @@ function UILibrary:CreateWindow(title)
                 end
                 
                 SliderBackground.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         isDragging = true
                         
                         local mousePos = input.Position.X
@@ -660,13 +1359,13 @@ function UILibrary:CreateWindow(title)
                 end)
                 
                 SliderBackground.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
                         isDragging = false
                     end
                 end)
                 
                 UserInputService.InputChanged:Connect(function(input)
-                    if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                         local mousePos = input.Position.X
                         local sliderPos = SliderBackground.AbsolutePosition.X
                         local sliderSize = SliderBackground.AbsoluteSize.X
@@ -678,14 +1377,25 @@ function UILibrary:CreateWindow(title)
                     end
                 end)
                 
-                return {
-                    Set = function(newValue)
-                        updateSlider(newValue)
-                    end,
+                -- Register UI element for config saving
+                local sliderElement = {
+                    Type = "Slider",
+                    Name = sliderName,
+                    Section = sectionName,
+                    Tab = name,
+                    Min = min,
+                    Max = max,
                     Get = function()
                         return value
+                    end,
+                    Set = function(newValue)
+                        updateSlider(newValue)
                     end
                 }
+                
+                table.insert(UIElements, sliderElement)
+                
+                return sliderElement
             end
             
             function SectionObj:CreateDropdown(dropdownName, options, callback)
@@ -850,14 +1560,14 @@ function UILibrary:CreateWindow(title)
                 end
                 
                 DropdownButton.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         updateDropdown()
                     end
                 end)
                 
                 -- Close dropdown when clicking elsewhere
                 UserInputService.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         local mousePos = UserInputService:GetMouseLocation()
                         if isOpen and not (mousePos.X >= DropdownButton.AbsolutePosition.X and
                                 mousePos.X <= DropdownButton.AbsolutePosition.X + DropdownButton.AbsoluteSize.X and
@@ -868,7 +1578,16 @@ function UILibrary:CreateWindow(title)
                     end
                 end)
                 
-                return {
+                -- Register UI element for config saving
+                local dropdownElement = {
+                    Type = "Dropdown",
+                    Name = dropdownName,
+                    Section = sectionName,
+                    Tab = name,
+                    Items = items,
+                    Get = function()
+                        return selectedItem
+                    end,
                     Set = function(item)
                         if table.find(items, item) and selectedItem ~= item then
                             selectedItem = item
@@ -886,9 +1605,6 @@ function UILibrary:CreateWindow(title)
                                 callback(item)
                             end
                         end
-                    end,
-                    Get = function()
-                        return selectedItem
                     end,
                     Refresh = function(newItems, keepSelected)
                         items = newItems
@@ -955,6 +1671,10 @@ function UILibrary:CreateWindow(title)
                         end
                     end
                 }
+                
+                table.insert(UIElements, dropdownElement)
+                
+                return dropdownElement
             end
             
             function SectionObj:CreateTextBox(boxName, defaultText, placeholder, callback)
@@ -1018,14 +1738,23 @@ function UILibrary:CreateWindow(title)
                     end
                 end)
                 
-                return {
-                    Set = function(newText)
-                        TextBoxInput.Text = newText
-                    end,
+                -- Register UI element for config saving
+                local textboxElement = {
+                    Type = "TextBox",
+                    Name = boxName,
+                    Section = sectionName,
+                    Tab = name,
                     Get = function()
                         return TextBoxInput.Text
+                    end,
+                    Set = function(text)
+                        TextBoxInput.Text = text
                     end
                 }
+                
+                table.insert(UIElements, textboxElement)
+                
+                return textboxElement
             end
             
             function SectionObj:CreateColorPicker(pickerName, defaultColor, callback)
@@ -1057,53 +1786,43 @@ function UILibrary:CreateWindow(title)
                 })
                 createRoundedCorner(ColorDisplay, 4)
                 
-                -- Simple implementation - in a real library you'd want a more sophisticated color picker
-                ColorDisplay.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        -- For this example, we'll just cycle through some preset colors
-                        local colors = {
-                            Color3.fromRGB(255, 0, 0),   -- Red
-                            Color3.fromRGB(255, 165, 0), -- Orange
-                            Color3.fromRGB(255, 255, 0), -- Yellow
-                            Color3.fromRGB(0, 255, 0),   -- Green
-                            Color3.fromRGB(0, 0, 255),   -- Blue
-                            Color3.fromRGB(128, 0, 128), -- Purple
-                            Color3.fromRGB(255, 0, 255)  -- Pink
-                        }
-                        
-                        local currentColor = ColorDisplay.BackgroundColor3
-                        local currentIndex = 1
-                        
-                        for i, color in ipairs(colors) do
-                            if color == currentColor then
-                                currentIndex = i
-                                break
-                            end
-                        end
-                        
-                        local nextIndex = (currentIndex % #colors) + 1
-                        local nextColor = colors[nextIndex]
-                        
-                        createTween(ColorDisplay, {BackgroundColor3 = nextColor}):Play()
-                        
-                        if callback then
-                            callback(nextColor)
-                        end
+                -- Create the color picker
+                local colorPickerInstance = createColorPicker(ColorDisplay, defaultColor or Color3.fromRGB(255, 0, 0), function(color)
+                    ColorDisplay.BackgroundColor3 = color
+                    if callback then
+                        callback(color)
                     end
                 end)
                 
-                return {
-                    Set = function(newColor)
-                        createTween(ColorDisplay, {BackgroundColor3 = newColor}):Play()
-                        
-                        if callback then
-                            callback(newColor)
-                        end
-                    end,
+                -- Show/hide color picker on click
+                ColorDisplay.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        colorPickerInstance.Gui.Visible = not colorPickerInstance.Gui.Visible
+                    end
+                end)
+                
+                -- Register UI element for config saving
+                local colorPickerElement = {
+                    Type = "ColorPicker",
+                    Name = pickerName,
+                    Section = sectionName,
+                    Tab = name,
                     Get = function()
                         return ColorDisplay.BackgroundColor3
+                    end,
+                    Set = function(color)
+                        ColorDisplay.BackgroundColor3 = color
+                        colorPickerInstance.SetColor(color)
+                        
+                        if callback then
+                            callback(color)
+                        end
                     end
                 }
+                
+                table.insert(UIElements, colorPickerElement)
+                
+                return colorPickerElement
             end
             
             function SectionObj:CreateButton(buttonName, callback)
@@ -1134,7 +1853,7 @@ function UILibrary:CreateWindow(title)
                 })
                 
                 ButtonFrame.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         createTween(ButtonFrame, {BackgroundColor3 = BUTTON_HOVER_COLOR}):Play()
                         
                         if callback then
@@ -1144,7 +1863,7 @@ function UILibrary:CreateWindow(title)
                 end)
                 
                 ButtonFrame.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         createTween(ButtonFrame, {BackgroundColor3 = BUTTON_COLOR}):Play()
                     end
                 end)
@@ -1156,6 +1875,58 @@ function UILibrary:CreateWindow(title)
         end
         
         return Tab
+    end
+    
+    -- Configuration functions
+    function Window:SaveConfig(name)
+        local configData = {}
+        
+        for _, element in ipairs(UIElements) do
+            local value = element.Get()
+            
+            -- Convert Color3 values to tables for JSON serialization
+            if element.Type == "ColorPicker" then
+                value = {
+                    R = value.R,
+                    G = value.G,
+                    B = value.B
+                }
+            end
+            
+            configData[element.Tab .. "_" .. element.Section .. "_" .. element.Name] = {
+                Type = element.Type,
+                Value = value
+            }
+        end
+        
+        return saveConfig(name, configData)
+    end
+    
+    function Window:LoadConfig(name)
+        local configData = loadConfig(name)
+        if not configData then
+            return false
+        end
+        
+        for _, element in ipairs(UIElements) do
+            local key = element.Tab .. "_" .. element.Section .. "_" .. element.Name
+            local data = configData[key]
+            
+            if data then
+                if element.Type == "ColorPicker" and type(data.Value) == "table" then
+                    -- Convert table back to Color3
+                    element.Set(Color3.new(data.Value.R, data.Value.G, data.Value.B))
+                else
+                    element.Set(data.Value)
+                end
+            end
+        end
+        
+        return true
+    end
+    
+    function Window:GetConfigList()
+        return getConfigList()
     end
     
     return Window
