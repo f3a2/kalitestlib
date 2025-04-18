@@ -109,453 +109,70 @@ end
 
 -- Color Picker Functions
 local function createColorPicker(parent, defaultColor, callback)
-    local ColorPickerGui = createInstance("Frame", {
-        Name = "ColorPickerGui",
-        Size = UDim2.new(0, 180, 0, 200),
-        Position = UDim2.new(0, 0, 0, 0),
-        BackgroundColor3 = BACKGROUND_COLOR,
-        BorderSizePixel = 0,
-        Visible = false,
-        ZIndex = 100,
-        Parent = CoreGui
-    })
-    createRoundedCorner(ColorPickerGui, 6)
-    createStroke(ColorPickerGui, Color3.fromRGB(50, 50, 50), 1, 0)
+    local colorOptions = {
+        Color3.fromRGB(255, 0, 0),    -- Red
+        Color3.fromRGB(255, 165, 0),  -- Orange
+        Color3.fromRGB(255, 255, 0),  -- Yellow
+        Color3.fromRGB(0, 255, 0),    -- Green
+        Color3.fromRGB(0, 255, 255),  -- Cyan
+        Color3.fromRGB(0, 0, 255),    -- Blue
+        Color3.fromRGB(255, 0, 255),  -- Purple
+        Color3.fromRGB(255, 255, 255),-- White
+        Color3.fromRGB(0, 0, 0)       -- Black
+    }
     
-    local ColorPickerTitle = createInstance("TextLabel", {
-        Name = "Title",
-        Size = UDim2.new(1, 0, 0, 24),
-        BackgroundTransparency = 1,
-        Text = "Color Picker",
-        TextColor3 = TEXT_COLOR,
-        TextSize = 14,
-        Font = Enum.Font.GothamSemibold,
-        ZIndex = 100,
-        Parent = ColorPickerGui
-    })
-    
-    -- Create the hue slider
-    local HueFrame = createInstance("Frame", {
-        Name = "HueFrame",
-        Size = UDim2.new(1, -20, 0, 16),
-        Position = UDim2.new(0, 10, 0, 130),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BorderSizePixel = 0,
-        ZIndex = 100,
-        Parent = ColorPickerGui
-    })
-    createRoundedCorner(HueFrame, 4)
-    
-    -- Create the hue gradient
-    local HueGradient = createInstance("UIGradient", {
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-            ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),
-            ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-            ColorSequenceKeypoint.new(0.667, Color3.fromRGB(0, 0, 255)),
-            ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
-        }),
-        Parent = HueFrame
-    })
-    
-    local HueSelector = createInstance("Frame", {
-        Name = "HueSelector",
-        Size = UDim2.new(0, 4, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BorderSizePixel = 0,
-        ZIndex = 101,
-        Parent = HueFrame
-    })
-    createRoundedCorner(HueSelector, 2)
-    
-    -- Create the saturation/value picker
-    local SVFrame = createInstance("Frame", {
-        Name = "SVFrame",
-        Size = UDim2.new(1, -20, 0, 90),
-        Position = UDim2.new(0, 10, 0, 35),
-        BackgroundColor3 = Color3.fromRGB(255, 0, 0),
-        BorderSizePixel = 0,
-        ZIndex = 100,
-        Parent = ColorPickerGui
-    })
-    createRoundedCorner(SVFrame, 4)
-    
-    -- Create the saturation gradient (white to color)
-    local SaturationGradient = createInstance("UIGradient", {
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
-        }),
-        Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0),
-            NumberSequenceKeypoint.new(1, 0)
-        }),
-        Rotation = 90,
-        Parent = SVFrame
-    })
-    
-    -- Create the value gradient (transparent to black)
-    local ValueFrame = createInstance("Frame", {
-        Name = "ValueFrame",
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-        BackgroundTransparency = 0,
-        BorderSizePixel = 0,
-        ZIndex = 101,
-        Parent = SVFrame
-    })
-    createRoundedCorner(ValueFrame, 4)
-    
-    local ValueGradient = createInstance("UIGradient", {
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
-        }),
-        Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(1, 0)
-        }),
-        Rotation = 0,
-        Parent = ValueFrame
-    })
-    
-    local SVSelector = createInstance("Frame", {
-        Name = "SVSelector",
-        Size = UDim2.new(0, 8, 0, 8),
-        Position = UDim2.new(1, -4, 0, -4),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BorderSizePixel = 0,
-        ZIndex = 102,
-        Parent = SVFrame
-    })
-    createRoundedCorner(SVSelector, 8)
-    createStroke(SVSelector, Color3.fromRGB(0, 0, 0), 1, 0)
-    
-    -- Create RGB input fields
-    local RGBFrame = createInstance("Frame", {
-        Name = "RGBFrame",
-        Size = UDim2.new(1, -20, 0, 25),
-        Position = UDim2.new(0, 10, 0, 155),
-        BackgroundTransparency = 1,
-        ZIndex = 100,
-        Parent = ColorPickerGui
-    })
-    
-    local RInput = createInstance("TextBox", {
-        Name = "RInput",
-        Size = UDim2.new(0, 35, 0, 25),
-        Position = UDim2.new(0, 0, 0, 0),
-        BackgroundColor3 = INPUT_BACKGROUND,
-        Text = "255",
-        TextColor3 = TEXT_COLOR,
-        PlaceholderText = "R",
-        TextSize = 12,
-        Font = Enum.Font.Gotham,
-        ClearTextOnFocus = false,
-        ZIndex = 100,
-        Parent = RGBFrame
-    })
-    createRoundedCorner(RInput, 4)
-    
-    local GInput = createInstance("TextBox", {
-        Name = "GInput",
-        Size = UDim2.new(0, 35, 0, 25),
-        Position = UDim2.new(0, 40, 0, 0),
-        BackgroundColor3 = INPUT_BACKGROUND,
-        Text = "0",
-        TextColor3 = TEXT_COLOR,
-        PlaceholderText = "G",
-        TextSize = 12,
-        Font = Enum.Font.Gotham,
-        ClearTextOnFocus = false,
-        ZIndex = 100,
-        Parent = RGBFrame
-    })
-    createRoundedCorner(GInput, 4)
-    
-    local BInput = createInstance("TextBox", {
-        Name = "BInput",
-        Size = UDim2.new(0, 35, 0, 25),
-        Position = UDim2.new(0, 80, 0, 0),
-        BackgroundColor3 = INPUT_BACKGROUND,
-        Text = "0",
-        TextColor3 = TEXT_COLOR,
-        PlaceholderText = "B",
-        TextSize = 12,
-        Font = Enum.Font.Gotham,
-        ClearTextOnFocus = false,
-        ZIndex = 100,
-        Parent = RGBFrame
-    })
-    createRoundedCorner(BInput, 4)
-    
-    local HexInput = createInstance("TextBox", {
-        Name = "HexInput",
-        Size = UDim2.new(0, 55, 0, 25),
-        Position = UDim2.new(0, 120, 0, 0),
-        BackgroundColor3 = INPUT_BACKGROUND,
-        Text = "#FF0000",
-        TextColor3 = TEXT_COLOR,
-        PlaceholderText = "Hex",
-        TextSize = 12,
-        Font = Enum.Font.Gotham,
-        ClearTextOnFocus = false,
-        ZIndex = 100,
-        Parent = RGBFrame
-    })
-    createRoundedCorner(HexInput, 4)
-    
-    -- Variables for color picking
-    local hue, sat, val = 0, 1, 1
-    local selectedColor = defaultColor or Color3.fromRGB(255, 0, 0)
-    
-    -- Function to update the color display
-    local function updateColor()
-        -- Convert HSV to RGB
-        local h, s, v = hue, sat, val
-        local r, g, b
-        
-        local i = math.floor(h * 6)
-        local f = h * 6 - i
-        local p = v * (1 - s)
-        local q = v * (1 - f * s)
-        local t = v * (1 - (1 - f) * s)
-        
-        i = i % 6
-        
-        if i == 0 then r, g, b = v, t, p
-        elseif i == 1 then r, g, b = q, v, p
-        elseif i == 2 then r, g, b = p, v, t
-        elseif i == 3 then r, g, b = p, q, v
-        elseif i == 4 then r, g, b = t, p, v
-        elseif i == 5 then r, g, b = v, p, q
+    local currentColorIndex = 1
+    -- Find the matching color in our options, or default to the first color
+    for i, color in ipairs(colorOptions) do
+        if color == defaultColor then
+            currentColorIndex = i
+            break
         end
+    end
+    
+    -- Create the color display button
+    local ColorDisplay = createInstance("TextButton", {
+        Name = "ColorDisplay",
+        Size = UDim2.new(0, 24, 0, 24),
+        BackgroundColor3 = colorOptions[currentColorIndex],
+        Text = "",
+        AutoButtonColor = false,
+        Parent = parent
+    })
+    createRoundedCorner(ColorDisplay, 4)
+    createStroke(ColorDisplay, Color3.fromRGB(50, 50, 50), 1, 0)
+    
+    -- Cycle through colors on click
+    ColorDisplay.MouseButton1Click:Connect(function()
+        currentColorIndex = (currentColorIndex % #colorOptions) + 1
+        local newColor = colorOptions[currentColorIndex]
+        ColorDisplay.BackgroundColor3 = newColor
         
-        selectedColor = Color3.fromRGB(r * 255, g * 255, b * 255)
-        
-        -- Update the SV frame color based on hue
-        SVFrame.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
-        
-        -- Update RGB inputs
-        RInput.Text = tostring(math.floor(selectedColor.R * 255))
-        GInput.Text = tostring(math.floor(selectedColor.G * 255))
-        BInput.Text = tostring(math.floor(selectedColor.B * 255))
-        
-        -- Update Hex input
-        local hexR = string.format("%02X", math.floor(selectedColor.R * 255))
-        local hexG = string.format("%02X", math.floor(selectedColor.G * 255))
-        local hexB = string.format("%02X", math.floor(selectedColor.B * 255))
-        HexInput.Text = "#" .. hexR .. hexG .. hexB
-        
-        -- Call the callback with the new color
         if callback then
-            callback(selectedColor)
-        end
-    end
-    
-    -- Function to set the color from RGB values
-    local function setColorFromRGB(r, g, b)
-        r, g, b = r / 255, g / 255, b / 255
-        
-        local max = math.max(r, g, b)
-        local min = math.min(r, g, b)
-        local delta = max - min
-        
-        -- Calculate value
-        val = max
-        
-        -- Calculate saturation
-        if max == 0 then
-            sat = 0
-        else
-            sat = delta / max
-        end
-        
-        -- Calculate hue
-        if delta == 0 then
-            hue = 0
-        elseif max == r then
-            hue = ((g - b) / delta) % 6
-        elseif max == g then
-            hue = (b - r) / delta + 2
-        else
-            hue = (r - g) / delta + 4
-        end
-        
-        hue = hue / 6
-        
-        -- Update selector positions
-        HueSelector.Position = UDim2.new(hue, -2, 0, 0)
-        SVSelector.Position = UDim2.new(sat, 0, 1 - val, 0)
-        
-        updateColor()
-    end
-    
-    -- Function to set the color from hex value
-    local function setColorFromHex(hex)
-        hex = hex:gsub("#", "")
-        
-        if #hex == 3 then
-            hex = hex:sub(1, 1) .. hex:sub(1, 1) .. hex:sub(2, 2) .. hex:sub(2, 2) .. hex:sub(3, 3) .. hex:sub(3, 3)
-        end
-        
-        if #hex ~= 6 then
-            return
-        end
-        
-        local r = tonumber(hex:sub(1, 2), 16) or 0
-        local g = tonumber(hex:sub(3, 4), 16) or 0
-        local b = tonumber(hex:sub(5, 6), 16) or 0
-        
-        setColorFromRGB(r, g, b)
-    end
-    
-    -- Set initial color
-    setColorFromRGB(
-        math.floor(defaultColor.R * 255),
-        math.floor(defaultColor.G * 255),
-        math.floor(defaultColor.B * 255)
-    )
-    
-    -- Hue slider interaction
-    local hueDragging = false
-    
-    HueFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            hueDragging = true
-            
-            local relativeX = math.clamp((input.Position.X - HueFrame.AbsolutePosition.X) / HueFrame.AbsoluteSize.X, 0, 1)
-            hue = relativeX
-            
-            HueSelector.Position = UDim2.new(relativeX, -2, 0, 0)
-            updateColor()
-        end
-    end)
-    
-    HueFrame.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            hueDragging = false
-        end
-    end)
-    
-    HueFrame.InputChanged:Connect(function(input)
-        if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and hueDragging then
-            local relativeX = math.clamp((input.Position.X - HueFrame.AbsolutePosition.X) / HueFrame.AbsoluteSize.X, 0, 1)
-            hue = relativeX
-            
-            HueSelector.Position = UDim2.new(relativeX, -2, 0, 0)
-            updateColor()
-        end
-    end)
-    
-    -- SV picker interaction
-    local svDragging = false
-    
-    SVFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            svDragging = true
-            
-            local relativeX = math.clamp((input.Position.X - SVFrame.AbsolutePosition.X) / SVFrame.AbsoluteSize.X, 0, 1)
-            local relativeY = math.clamp((input.Position.Y - SVFrame.AbsolutePosition.Y) / SVFrame.AbsoluteSize.Y, 0, 1)
-            
-            sat = relativeX
-            val = 1 - relativeY
-            
-            SVSelector.Position = UDim2.new(relativeX, 0, relativeY, 0)
-            updateColor()
-        end
-    end)
-    
-    SVFrame.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            svDragging = false
-        end
-    end)
-    
-    SVFrame.InputChanged:Connect(function(input)
-        if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and svDragging then
-            local relativeX = math.clamp((input.Position.X - SVFrame.AbsolutePosition.X) / SVFrame.AbsoluteSize.X, 0, 1)
-            local relativeY = math.clamp((input.Position.Y - SVFrame.AbsolutePosition.Y) / SVFrame.AbsoluteSize.Y, 0, 1)
-            
-            sat = relativeX
-            val = 1 - relativeY
-            
-            SVSelector.Position = UDim2.new(relativeX, 0, relativeY, 0)
-            updateColor()
-        end
-    end)
-    
-    -- RGB input handling
-    RInput.FocusLost:Connect(function()
-        local r = tonumber(RInput.Text) or 0
-        r = math.clamp(r, 0, 255)
-        
-        local g = tonumber(GInput.Text) or 0
-        local b = tonumber(BInput.Text) or 0
-        
-        setColorFromRGB(r, g, b)
-    end)
-    
-    GInput.FocusLost:Connect(function()
-        local g = tonumber(GInput.Text) or 0
-        g = math.clamp(g, 0, 255)
-        
-        local r = tonumber(RInput.Text) or 0
-        local b = tonumber(BInput.Text) or 0
-        
-        setColorFromRGB(r, g, b)
-    end)
-    
-    BInput.FocusLost:Connect(function()
-        local b = tonumber(BInput.Text) or 0
-        b = math.clamp(b, 0, 255)
-        
-        local r = tonumber(RInput.Text) or 0
-        local g = tonumber(GInput.Text) or 0
-        
-        setColorFromRGB(r, g, b)
-    end)
-    
-    -- Hex input handling
-    HexInput.FocusLost:Connect(function()
-        local hex = HexInput.Text
-        setColorFromHex(hex)
-    end)
-    
-    -- Close color picker when clicking outside
-    UserInputService.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            local mousePos = UserInputService:GetMouseLocation()
-            if ColorPickerGui.Visible and not (
-                mousePos.X >= ColorPickerGui.AbsolutePosition.X and
-                mousePos.X <= ColorPickerGui.AbsolutePosition.X + ColorPickerGui.AbsoluteSize.X and
-                mousePos.Y >= ColorPickerGui.AbsolutePosition.Y and
-                mousePos.Y <= ColorPickerGui.AbsolutePosition.Y + ColorPickerGui.AbsoluteSize.Y
-            ) and not (
-                mousePos.X >= parent.AbsolutePosition.X and
-                mousePos.X <= parent.AbsolutePosition.X + parent.AbsoluteSize.X and
-                mousePos.Y >= parent.AbsolutePosition.Y and
-                mousePos.Y <= parent.AbsolutePosition.Y + parent.AbsoluteSize.Y
-            ) then
-                ColorPickerGui.Visible = false
-            end
+            callback(newColor)
         end
     end)
     
     return {
-        Gui = ColorPickerGui,
-        SetColor = function(color)
-            setColorFromRGB(
-                math.floor(color.R * 255),
-                math.floor(color.G * 255),
-                math.floor(color.B * 255)
-            )
-        end,
         GetColor = function()
-            return selectedColor
+            return ColorDisplay.BackgroundColor3
+        end,
+        SetColor = function(color)
+            for i, c in ipairs(colorOptions) do
+                if c == color then
+                    currentColorIndex = i
+                    ColorDisplay.BackgroundColor3 = color
+                    if callback then
+                        callback(color)
+                    end
+                    return
+                end
+            end
+            -- If color not found in options, use it anyway
+            ColorDisplay.BackgroundColor3 = color
+            if callback then
+                callback(color)
+            end
         end
     }
 end
@@ -1718,9 +1335,10 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 local items = options.items or {}
                 local default = options.default or items[1] or ""
                 
+                -- Increase the vertical spacing to prevent overlap with textboxes
                 local Dropdown = createInstance("Frame", {
                     Name = dropdownName .. "Dropdown",
-                    Size = UDim2.new(1, 0, 0, 50),
+                    Size = UDim2.new(1, 0, 0, 60), -- Increased height to prevent overlap
                     BackgroundTransparency = 1,
                     Parent = SectionContent,
                     ZIndex = 1
@@ -1777,6 +1395,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Parent = DropdownButton
                 })
                 
+                -- Create dropdown menu as a separate GUI to ensure it's always on top
                 local DropdownMenu = createInstance("Frame", {
                     Name = "Menu",
                     Size = UDim2.new(1, 0, 0, 0),
@@ -1784,19 +1403,17 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     BackgroundColor3 = DROPDOWN_BACKGROUND,
                     ClipsDescendants = true,
                     Visible = false,
-                    ZIndex = 10,
-                    Parent = Dropdown
+                    ZIndex = 100, -- Very high Z-index to ensure it's on top
+                    Parent = DropdownButton -- Parent to the button for proper positioning
                 })
                 createRoundedCorner(DropdownMenu, 4)
                 createStroke(DropdownMenu, Color3.fromRGB(50, 50, 50), 1, 0)
                 
-                local DropdownList = createInstance("ScrollingFrame", {
+                local DropdownList = createInstance("Frame", {
                     Name = "List",
                     Size = UDim2.new(1, 0, 1, 0),
                     BackgroundTransparency = 1,
-                    ScrollBarThickness = 2,
-                    ScrollBarImageColor3 = SECONDARY_TEXT_COLOR,
-                    ZIndex = 10,
+                    ZIndex = 100,
                     Parent = DropdownMenu
                 })
                 
@@ -1822,11 +1439,12 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     
                     if isOpen then
                         DropdownMenu.Visible = true
-                        createTween(DropdownMenu, {Size = UDim2.new(1, 0, 0, math.min(#items * 30, 150))}):Play()
-                        createTween(DropdownArrow, {Rotation = 180}):Play()
+                        local menuHeight = math.min(#items * 30, 150)
+                        DropdownMenu.Size = UDim2.new(1, 0, 0, menuHeight)
+                        DropdownArrow.Rotation = 180
                     else
-                        createTween(DropdownMenu, {Size = UDim2.new(1, 0, 0, 0)}):Play()
-                        createTween(DropdownArrow, {Rotation = 0}):Play()
+                        DropdownMenu.Size = UDim2.new(1, 0, 0, 0)
+                        DropdownArrow.Rotation = 0
                         
                         delay(0.2, function()
                             if not isOpen then
@@ -1841,24 +1459,25 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     local ItemButton = createInstance("TextButton", {
                         Name = "Item_" .. i,
                         Size = UDim2.new(1, -10, 0, 25),
-                        BackgroundTransparency = 1,
+                        BackgroundColor3 = BUTTON_COLOR,
                         Text = item,
                         TextColor3 = item == selectedItem and ACCENT_COLOR or SECONDARY_TEXT_COLOR,
                         TextSize = 14,
                         Font = Enum.Font.Gotham,
-                        ZIndex = 10,
+                        ZIndex = 101,
                         Parent = DropdownList
                     })
+                    createRoundedCorner(ItemButton, 4)
                     
                     ItemButton.MouseEnter:Connect(function()
                         if item ~= selectedItem then
-                            createTween(ItemButton, {TextColor3 = TEXT_COLOR}):Play()
+                            ItemButton.BackgroundColor3 = BUTTON_HOVER_COLOR
                         end
                     end)
                     
                     ItemButton.MouseLeave:Connect(function()
                         if item ~= selectedItem then
-                            createTween(ItemButton, {TextColor3 = SECONDARY_TEXT_COLOR}):Play()
+                            ItemButton.BackgroundColor3 = BUTTON_COLOR
                         end
                     end)
                     
@@ -1867,13 +1486,14 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                             -- Update selected item
                             for _, child in pairs(DropdownList:GetChildren()) do
                                 if child:IsA("TextButton") then
-                                    createTween(child, {TextColor3 = SECONDARY_TEXT_COLOR}):Play()
+                                    child.TextColor3 = SECONDARY_TEXT_COLOR
+                                    child.BackgroundColor3 = BUTTON_COLOR
                                 end
                             end
                             
                             selectedItem = item
                             DropdownText.Text = item
-                            createTween(ItemButton, {TextColor3 = ACCENT_COLOR}):Play()
+                            ItemButton.TextColor3 = ACCENT_COLOR
                             
                             if callback then
                                 callback(item)
@@ -1894,11 +1514,12 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 -- Close dropdown when clicking elsewhere
                 UserInputService.InputBegan:Connect(function(input)
                     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        local mousePos = UserInputService:GetMouseLocation()
-                        if isOpen and not (mousePos.X >= DropdownButton.AbsolutePosition.X and
-                                mousePos.X <= DropdownButton.AbsolutePosition.X + DropdownButton.AbsoluteSize.X and
-                                mousePos.Y >= DropdownButton.AbsolutePosition.Y and
-                                mousePos.Y <= DropdownButton.AbsolutePosition.Y + DropdownButton.AbsoluteSize.Y + DropdownMenu.AbsoluteSize.Y) then
+                        if isOpen and not (
+                            input.Position.X >= DropdownButton.AbsolutePosition.X and
+                            input.Position.X <= DropdownButton.AbsolutePosition.X + DropdownButton.AbsoluteSize.X and
+                            input.Position.Y >= DropdownButton.AbsolutePosition.Y and
+                            input.Position.Y <= DropdownButton.AbsolutePosition.Y + DropdownMenu.AbsoluteSize.Y + DropdownButton.AbsoluteSize.Y
+                        ) then
                             updateDropdown()
                         end
                     end
@@ -1921,9 +1542,9 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                             
                             for _, child in pairs(DropdownList:GetChildren()) do
                                 if child:IsA("TextButton") and child.Text == item then
-                                    createTween(child, {TextColor3 = ACCENT_COLOR}):Play()
+                                    child.TextColor3 = ACCENT_COLOR
                                 elseif child:IsA("TextButton") then
-                                    createTween(child, {TextColor3 = SECONDARY_TEXT_COLOR}):Play()
+                                    child.TextColor3 = SECONDARY_TEXT_COLOR
                                 end
                             end
                             
@@ -1953,24 +1574,25 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                             local ItemButton = createInstance("TextButton", {
                                 Name = "Item_" .. i,
                                 Size = UDim2.new(1, -10, 0, 25),
-                                BackgroundTransparency = 1,
+                                BackgroundColor3 = BUTTON_COLOR,
                                 Text = item,
                                 TextColor3 = item == selectedItem and ACCENT_COLOR or SECONDARY_TEXT_COLOR,
                                 TextSize = 14,
                                 Font = Enum.Font.Gotham,
-                                ZIndex = 10,
+                                ZIndex = 101,
                                 Parent = DropdownList
                             })
+                            createRoundedCorner(ItemButton, 4)
                             
                             ItemButton.MouseEnter:Connect(function()
                                 if item ~= selectedItem then
-                                    createTween(ItemButton, {TextColor3 = TEXT_COLOR}):Play()
+                                    ItemButton.BackgroundColor3 = BUTTON_HOVER_COLOR
                                 end
                             end)
                             
                             ItemButton.MouseLeave:Connect(function()
                                 if item ~= selectedItem then
-                                    createTween(ItemButton, {TextColor3 = SECONDARY_TEXT_COLOR}):Play()
+                                    ItemButton.BackgroundColor3 = BUTTON_COLOR
                                 end
                             end)
                             
@@ -1979,13 +1601,14 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                                     -- Update selected item
                                     for _, child in pairs(DropdownList:GetChildren()) do
                                         if child:IsA("TextButton") then
-                                            createTween(child, {TextColor3 = SECONDARY_TEXT_COLOR}):Play()
+                                            child.TextColor3 = SECONDARY_TEXT_COLOR
+                                            child.BackgroundColor3 = BUTTON_COLOR
                                         end
                                     end
                                     
                                     selectedItem = item
                                     DropdownText.Text = item
-                                    createTween(ItemButton, {TextColor3 = ACCENT_COLOR}):Play()
+                                    ItemButton.TextColor3 = ACCENT_COLOR
                                     
                                     if callback then
                                         callback(item)
@@ -2124,7 +1747,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 createRoundedCorner(ColorDisplay, 4)
                 createStroke(ColorDisplay, Color3.fromRGB(50, 50, 50), 1, 0)
                 
-                -- Create the color picker
+                -- Create the simple color picker
                 local colorPickerInstance = createColorPicker(ColorDisplay, defaultColor or Color3.fromRGB(255, 0, 0), function(color)
                     ColorDisplay.BackgroundColor3 = color
                     if callback then
@@ -2137,16 +1760,6 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                         G = color.G,
                         B = color.B
                     }
-                end)
-                
-                -- Show/hide color picker on click
-                ColorDisplay.MouseButton1Click:Connect(function()
-                    colorPickerInstance.Gui.Visible = not colorPickerInstance.Gui.Visible
-                    
-                    -- Position the color picker properly
-                    if colorPickerInstance.Gui.Visible then
-                        colorPickerInstance.Gui.Position = UDim2.new(0, ColorDisplay.AbsolutePosition.X + ColorDisplay.AbsoluteSize.X + 10, 0, ColorDisplay.AbsolutePosition.Y)
-                    end
                 end)
                 
                 -- Register UI element for config saving
