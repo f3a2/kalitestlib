@@ -111,37 +111,37 @@ end
 local function createColorPicker(parent, defaultColor, callback)
     local ColorPickerGui = createInstance("Frame", {
         Name = "ColorPickerGui",
-        Size = UDim2.new(0, 200, 0, 220),
-        Position = UDim2.new(1, 10, 0, 0),
+        Size = UDim2.new(0, 180, 0, 200),
+        Position = UDim2.new(0, 0, 0, 0),
         BackgroundColor3 = BACKGROUND_COLOR,
         BorderSizePixel = 0,
         Visible = false,
-        ZIndex = 10,
-        Parent = parent
+        ZIndex = 20,
+        Parent = CoreGui
     })
     createRoundedCorner(ColorPickerGui, 6)
     createStroke(ColorPickerGui, Color3.fromRGB(50, 50, 50), 1, 0)
     
     local ColorPickerTitle = createInstance("TextLabel", {
         Name = "Title",
-        Size = UDim2.new(1, 0, 0, 30),
+        Size = UDim2.new(1, 0, 0, 24),
         BackgroundTransparency = 1,
         Text = "Color Picker",
         TextColor3 = TEXT_COLOR,
         TextSize = 14,
         Font = Enum.Font.GothamSemibold,
-        ZIndex = 10,
+        ZIndex = 20,
         Parent = ColorPickerGui
     })
     
     -- Create the hue slider
     local HueFrame = createInstance("Frame", {
         Name = "HueFrame",
-        Size = UDim2.new(1, -20, 0, 20),
-        Position = UDim2.new(0, 10, 0, 140),
+        Size = UDim2.new(1, -20, 0, 16),
+        Position = UDim2.new(0, 10, 0, 130),
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
-        ZIndex = 10,
+        ZIndex = 20,
         Parent = ColorPickerGui
     })
     createRoundedCorner(HueFrame, 4)
@@ -165,7 +165,7 @@ local function createColorPicker(parent, defaultColor, callback)
         Size = UDim2.new(0, 4, 1, 0),
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
-        ZIndex = 11,
+        ZIndex = 21,
         Parent = HueFrame
     })
     createRoundedCorner(HueSelector, 2)
@@ -173,11 +173,11 @@ local function createColorPicker(parent, defaultColor, callback)
     -- Create the saturation/value picker
     local SVFrame = createInstance("Frame", {
         Name = "SVFrame",
-        Size = UDim2.new(1, -20, 0, 100),
+        Size = UDim2.new(1, -20, 0, 90),
         Position = UDim2.new(0, 10, 0, 35),
         BackgroundColor3 = Color3.fromRGB(255, 0, 0),
         BorderSizePixel = 0,
-        ZIndex = 10,
+        ZIndex = 20,
         Parent = ColorPickerGui
     })
     createRoundedCorner(SVFrame, 4)
@@ -203,7 +203,7 @@ local function createColorPicker(parent, defaultColor, callback)
         BackgroundColor3 = Color3.fromRGB(0, 0, 0),
         BackgroundTransparency = 0,
         BorderSizePixel = 0,
-        ZIndex = 11,
+        ZIndex = 21,
         Parent = SVFrame
     })
     createRoundedCorner(ValueFrame, 4)
@@ -223,30 +223,30 @@ local function createColorPicker(parent, defaultColor, callback)
     
     local SVSelector = createInstance("Frame", {
         Name = "SVSelector",
-        Size = UDim2.new(0, 10, 0, 10),
-        Position = UDim2.new(1, -5, 0, -5),
+        Size = UDim2.new(0, 8, 0, 8),
+        Position = UDim2.new(1, -4, 0, -4),
         AnchorPoint = Vector2.new(0.5, 0.5),
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
-        ZIndex = 12,
+        ZIndex = 22,
         Parent = SVFrame
     })
-    createRoundedCorner(SVSelector, 10)
+    createRoundedCorner(SVSelector, 8)
     createStroke(SVSelector, Color3.fromRGB(0, 0, 0), 1, 0)
     
     -- Create RGB input fields
     local RGBFrame = createInstance("Frame", {
         Name = "RGBFrame",
         Size = UDim2.new(1, -20, 0, 25),
-        Position = UDim2.new(0, 10, 0, 170),
+        Position = UDim2.new(0, 10, 0, 155),
         BackgroundTransparency = 1,
-        ZIndex = 10,
+        ZIndex = 20,
         Parent = ColorPickerGui
     })
     
     local RInput = createInstance("TextBox", {
         Name = "RInput",
-        Size = UDim2.new(0, 40, 0, 25),
+        Size = UDim2.new(0, 35, 0, 25),
         Position = UDim2.new(0, 0, 0, 0),
         BackgroundColor3 = INPUT_BACKGROUND,
         Text = "255",
@@ -255,15 +255,15 @@ local function createColorPicker(parent, defaultColor, callback)
         TextSize = 12,
         Font = Enum.Font.Gotham,
         ClearTextOnFocus = false,
-        ZIndex = 10,
+        ZIndex = 20,
         Parent = RGBFrame
     })
     createRoundedCorner(RInput, 4)
     
     local GInput = createInstance("TextBox", {
         Name = "GInput",
-        Size = UDim2.new(0, 40, 0, 25),
-        Position = UDim2.new(0, 45, 0, 0),
+        Size = UDim2.new(0, 35, 0, 25),
+        Position = UDim2.new(0, 40, 0, 0),
         BackgroundColor3 = INPUT_BACKGROUND,
         Text = "0",
         TextColor3 = TEXT_COLOR,
@@ -271,15 +271,15 @@ local function createColorPicker(parent, defaultColor, callback)
         TextSize = 12,
         Font = Enum.Font.Gotham,
         ClearTextOnFocus = false,
-        ZIndex = 10,
+        ZIndex = 20,
         Parent = RGBFrame
     })
     createRoundedCorner(GInput, 4)
     
     local BInput = createInstance("TextBox", {
         Name = "BInput",
-        Size = UDim2.new(0, 40, 0, 25),
-        Position = UDim2.new(0, 90, 0, 0),
+        Size = UDim2.new(0, 35, 0, 25),
+        Position = UDim2.new(0, 80, 0, 0),
         BackgroundColor3 = INPUT_BACKGROUND,
         Text = "0",
         TextColor3 = TEXT_COLOR,
@@ -287,15 +287,15 @@ local function createColorPicker(parent, defaultColor, callback)
         TextSize = 12,
         Font = Enum.Font.Gotham,
         ClearTextOnFocus = false,
-        ZIndex = 10,
+        ZIndex = 20,
         Parent = RGBFrame
     })
     createRoundedCorner(BInput, 4)
     
     local HexInput = createInstance("TextBox", {
         Name = "HexInput",
-        Size = UDim2.new(0, 60, 0, 25),
-        Position = UDim2.new(0, 135, 0, 0),
+        Size = UDim2.new(0, 55, 0, 25),
+        Position = UDim2.new(0, 120, 0, 0),
         BackgroundColor3 = INPUT_BACKGROUND,
         Text = "#FF0000",
         TextColor3 = TEXT_COLOR,
@@ -303,7 +303,7 @@ local function createColorPicker(parent, defaultColor, callback)
         TextSize = 12,
         Font = Enum.Font.Gotham,
         ClearTextOnFocus = false,
-        ZIndex = 10,
+        ZIndex = 20,
         Parent = RGBFrame
     })
     createRoundedCorner(HexInput, 4)
@@ -631,6 +631,220 @@ local function fetchKey(url)
     end
 end
 
+-- ESP Functions
+local ESPEnabled = false
+local ESPSettings = {
+    BoxEnabled = false,
+    NameEnabled = false,
+    DistanceEnabled = false,
+    TracerEnabled = false,
+    HealthEnabled = false,
+    TeamEnabled = false,
+    TeamColor = false,
+    BoxColor = Color3.fromRGB(255, 255, 255),
+    NameColor = Color3.fromRGB(255, 255, 255),
+    DistanceColor = Color3.fromRGB(255, 255, 255),
+    TracerColor = Color3.fromRGB(255, 255, 255),
+    MaxDistance = 1000,
+    TextSize = 14,
+    BoxThickness = 1,
+    TracerThickness = 1,
+    TracerOrigin = "Bottom", -- "Bottom", "Top", "Mouse"
+}
+
+local ESPObjects = {}
+
+local function createESPObject(player)
+    if player == LocalPlayer then return end
+    
+    local esp = {}
+    
+    -- Box ESP
+    esp.Box = Drawing.new("Square")
+    esp.Box.Visible = false
+    esp.Box.Color = ESPSettings.BoxColor
+    esp.Box.Thickness = ESPSettings.BoxThickness
+    esp.Box.Filled = false
+    esp.Box.Transparency = 1
+    
+    -- Name ESP
+    esp.Name = Drawing.new("Text")
+    esp.Name.Visible = false
+    esp.Name.Color = ESPSettings.NameColor
+    esp.Name.Size = ESPSettings.TextSize
+    esp.Name.Center = true
+    esp.Name.Outline = true
+    esp.Name.OutlineColor = Color3.fromRGB(0, 0, 0)
+    esp.Name.Font = 2 -- Enum.Font.Code
+    
+    -- Distance ESP
+    esp.Distance = Drawing.new("Text")
+    esp.Distance.Visible = false
+    esp.Distance.Color = ESPSettings.DistanceColor
+    esp.Distance.Size = ESPSettings.TextSize
+    esp.Distance.Center = true
+    esp.Distance.Outline = true
+    esp.Distance.OutlineColor = Color3.fromRGB(0, 0, 0)
+    esp.Distance.Font = 2 -- Enum.Font.Code
+    
+    -- Tracer ESP
+    esp.Tracer = Drawing.new("Line")
+    esp.Tracer.Visible = false
+    esp.Tracer.Color = ESPSettings.TracerColor
+    esp.Tracer.Thickness = ESPSettings.TracerThickness
+    esp.Tracer.Transparency = 1
+    
+    -- Health Bar Background
+    esp.HealthBG = Drawing.new("Square")
+    esp.HealthBG.Visible = false
+    esp.HealthBG.Color = Color3.fromRGB(0, 0, 0)
+    esp.HealthBG.Thickness = 1
+    esp.HealthBG.Filled = true
+    esp.HealthBG.Transparency = 0.5
+    
+    -- Health Bar
+    esp.Health = Drawing.new("Square")
+    esp.Health.Visible = false
+    esp.Health.Thickness = 1
+    esp.Health.Filled = true
+    esp.Health.Transparency = 1
+    
+    -- Team Text
+    esp.Team = Drawing.new("Text")
+    esp.Team.Visible = false
+    esp.Team.Color = ESPSettings.NameColor
+    esp.Team.Size = ESPSettings.TextSize
+    esp.Team.Center = true
+    esp.Team.Outline = true
+    esp.Team.OutlineColor = Color3.fromRGB(0, 0, 0)
+    esp.Team.Font = 2 -- Enum.Font.Code
+    
+    ESPObjects[player] = esp
+    
+    player.CharacterAdded:Connect(function()
+        if not ESPObjects[player] then
+            createESPObject(player)
+        end
+    end)
+end
+
+local function removeESPObject(player)
+    if ESPObjects[player] then
+        for _, obj in pairs(ESPObjects[player]) do
+            obj:Remove()
+        end
+        ESPObjects[player] = nil
+    end
+end
+
+local function updateESP()
+    for player, esp in pairs(ESPObjects) do
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
+            local character = player.Character
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            local humanoid = character:FindFirstChild("Humanoid")
+            local head = character:FindFirstChild("Head")
+            
+            if not humanoidRootPart or not humanoid or not head then
+                continue
+            end
+            
+            local vector, onScreen = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position)
+            local distance = (humanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
+            
+            if onScreen and distance <= ESPSettings.MaxDistance and ESPEnabled then
+                -- Calculate box size based on distance
+                local size = 1 / (vector.Z * 0.01) * 2
+                local boxSize = Vector2.new(size, size * 1.5)
+                local boxPosition = Vector2.new(vector.X - size / 2, vector.Y - size / 2)
+                
+                -- Update box
+                esp.Box.Visible = ESPSettings.BoxEnabled
+                esp.Box.Size = boxSize
+                esp.Box.Position = boxPosition
+                esp.Box.Color = ESPSettings.TeamColor and player.TeamColor.Color or ESPSettings.BoxColor
+                
+                -- Update name
+                esp.Name.Visible = ESPSettings.NameEnabled
+                esp.Name.Position = Vector2.new(vector.X, vector.Y - boxSize.Y / 2 - esp.Name.TextBounds.Y - 2)
+                esp.Name.Text = player.Name
+                esp.Name.Color = ESPSettings.TeamColor and player.TeamColor.Color or ESPSettings.NameColor
+                
+                -- Update distance
+                esp.Distance.Visible = ESPSettings.DistanceEnabled
+                esp.Distance.Position = Vector2.new(vector.X, vector.Y + boxSize.Y / 2 + 2)
+                esp.Distance.Text = math.floor(distance) .. " studs"
+                esp.Distance.Color = ESPSettings.TeamColor and player.TeamColor.Color or ESPSettings.DistanceColor
+                
+                -- Update tracer
+                esp.Tracer.Visible = ESPSettings.TracerEnabled
+                
+                local tracerStart
+                if ESPSettings.TracerOrigin == "Bottom" then
+                    tracerStart = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y)
+                elseif ESPSettings.TracerOrigin == "Top" then
+                    tracerStart = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, 0)
+                elseif ESPSettings.TracerOrigin == "Mouse" then
+                    tracerStart = Vector2.new(Mouse.X, Mouse.Y)
+                end
+                
+                esp.Tracer.From = tracerStart
+                esp.Tracer.To = Vector2.new(vector.X, vector.Y)
+                esp.Tracer.Color = ESPSettings.TeamColor and player.TeamColor.Color or ESPSettings.TracerColor
+                
+                -- Update health bar
+                if ESPSettings.HealthEnabled and humanoid then
+                    local health = humanoid.Health
+                    local maxHealth = humanoid.MaxHealth
+                    local healthPercent = math.clamp(health / maxHealth, 0, 1)
+                    
+                    esp.HealthBG.Visible = true
+                    esp.HealthBG.Size = Vector2.new(4, boxSize.Y)
+                    esp.HealthBG.Position = Vector2.new(boxPosition.X - 6, boxPosition.Y)
+                    
+                    esp.Health.Visible = true
+                    esp.Health.Size = Vector2.new(4, boxSize.Y * healthPercent)
+                    esp.Health.Position = Vector2.new(boxPosition.X - 6, boxPosition.Y + boxSize.Y * (1 - healthPercent))
+                    
+                    -- Health color gradient: red to green
+                    esp.Health.Color = Color3.fromRGB(255 * (1 - healthPercent), 255 * healthPercent, 0)
+                else
+                    esp.HealthBG.Visible = false
+                    esp.Health.Visible = false
+                end
+                
+                -- Update team text
+                if ESPSettings.TeamEnabled then
+                    esp.Team.Visible = true
+                    esp.Team.Position = Vector2.new(vector.X, vector.Y + boxSize.Y / 2 + (ESPSettings.DistanceEnabled and esp.Distance.TextBounds.Y + 2 or 0) + 2)
+                    esp.Team.Text = player.Team and player.Team.Name or "No Team"
+                    esp.Team.Color = player.Team and player.TeamColor.Color or Color3.fromRGB(255, 255, 255)
+                else
+                    esp.Team.Visible = false
+                end
+            else
+                -- Hide ESP if player is not on screen or too far
+                esp.Box.Visible = false
+                esp.Name.Visible = false
+                esp.Distance.Visible = false
+                esp.Tracer.Visible = false
+                esp.HealthBG.Visible = false
+                esp.Health.Visible = false
+                esp.Team.Visible = false
+            end
+        else
+            -- Hide ESP if player character doesn't exist
+            esp.Box.Visible = false
+            esp.Name.Visible = false
+            esp.Distance.Visible = false
+            esp.Tracer.Visible = false
+            esp.HealthBG.Visible = false
+            esp.Health.Visible = false
+            esp.Team.Visible = false
+        end
+    end
+end
+
 -- Main Library Functions
 function UILibrary:CreateWindow(title, keySystemOptions)
     -- Initialize global config table
@@ -806,8 +1020,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
     -- Create main frame
     local MainFrame = createInstance("Frame", {
         Name = "MainFrame",
-        Size = UDim2.new(0, 600, 0, 400),
-        Position = UDim2.new(0.5, -300, 0.5, -200),
+        Size = UDim2.new(0, 650, 0, 400),
+        Position = UDim2.new(0.5, -325, 0.5, -200),
         BackgroundColor3 = BACKGROUND_COLOR,
         BorderSizePixel = 0,
         Parent = UILibraryGui,
@@ -916,25 +1130,11 @@ function UILibrary:CreateWindow(title, keySystemOptions)
         Parent = ContentArea
     })
     
-    -- Create tab title
-    local TabTitle = createInstance("TextLabel", {
-        Name = "TabTitle",
-        Size = UDim2.new(0, 200, 1, 0),
-        Position = UDim2.new(0, 20, 0, 0),
-        BackgroundTransparency = 1,
-        Text = "Main",
-        TextColor3 = TEXT_COLOR,
-        TextSize = 16,
-        Font = Enum.Font.GothamSemibold,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = TopBar
-    })
-    
     -- Create search bar
     local SearchFrame = createInstance("Frame", {
         Name = "SearchFrame",
-        Size = UDim2.new(0, 150, 0, 30),
-        Position = UDim2.new(1, -170, 0.5, -15),
+        Size = UDim2.new(0, 200, 0, 30),
+        Position = UDim2.new(1, -220, 0.5, -15),
         BackgroundColor3 = SIDEBAR_COLOR,
         BorderSizePixel = 0,
         Parent = TopBar
@@ -942,28 +1142,30 @@ function UILibrary:CreateWindow(title, keySystemOptions)
     createRoundedCorner(SearchFrame, 4)
     createStroke(SearchFrame, Color3.fromRGB(50, 50, 50), 1, 0)
     
-    local SearchLabel = createInstance("TextLabel", {
-        Name = "SearchLabel",
-        Size = UDim2.new(0, 50, 1, 0),
-        Position = UDim2.new(0, 10, 0, 0),
-        BackgroundTransparency = 1,
-        Text = "Search",
-        TextColor3 = SECONDARY_TEXT_COLOR,
-        TextSize = 14,
-        Font = Enum.Font.Gotham,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = SearchFrame
-    })
-    
     local SearchIcon = createInstance("ImageLabel", {
         Name = "SearchIcon",
         Size = UDim2.new(0, 16, 0, 16),
-        Position = UDim2.new(1, -26, 0.5, -8),
+        Position = UDim2.new(0, 10, 0.5, -8),
         BackgroundTransparency = 1,
         Image = "rbxassetid://3926305904",
         ImageRectOffset = Vector2.new(964, 324),
         ImageRectSize = Vector2.new(36, 36),
         ImageColor3 = SECONDARY_TEXT_COLOR,
+        Parent = SearchFrame
+    })
+    
+    local SearchInput = createInstance("TextBox", {
+        Name = "SearchInput",
+        Size = UDim2.new(1, -40, 1, 0),
+        Position = UDim2.new(0, 30, 0, 0),
+        BackgroundTransparency = 1,
+        Text = "",
+        PlaceholderText = "Search...",
+        TextColor3 = TEXT_COLOR,
+        PlaceholderColor3 = SECONDARY_TEXT_COLOR,
+        TextSize = 14,
+        Font = Enum.Font.Gotham,
+        ClearTextOnFocus = false,
         Parent = SearchFrame
     })
     
@@ -974,26 +1176,6 @@ function UILibrary:CreateWindow(title, keySystemOptions)
         Position = UDim2.new(0, 0, 0, 40),
         BackgroundTransparency = 1,
         Parent = ContentArea
-    })
-    
-    -- Create bottom bar
-    local BottomBar = createInstance("Frame", {
-        Name = "BottomBar",
-        Size = UDim2.new(1, 0, 0, 30),
-        Position = UDim2.new(0, 0, 1, -30),
-        BackgroundTransparency = 1,
-        Parent = MainFrame
-    })
-    
-    local BottomText = createInstance("TextLabel", {
-        Name = "BottomText",
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Text = "UI Library v1.0",
-        TextColor3 = SECONDARY_TEXT_COLOR,
-        TextSize = 14,
-        Font = Enum.Font.Gotham,
-        Parent = BottomBar
     })
     
     -- Create mobile toggle button
@@ -1029,6 +1211,52 @@ function UILibrary:CreateWindow(title, keySystemOptions)
     local UIElements = {}
     
     local Window = {}
+    
+    -- Add search functionality
+    SearchInput.Changed:Connect(function(prop)
+        if prop == "Text" then
+            local searchText = string.lower(SearchInput.Text)
+            
+            -- Search through all UI elements
+            for _, tab in pairs(Tabs) do
+                local tabContent = tab.Content
+                
+                for _, section in ipairs(tabContent:GetChildren()) do
+                    if section:IsA("Frame") and section.Name:match("Section$") then
+                        local sectionContent = section:FindFirstChild("Content")
+                        local sectionTitle = section:FindFirstChild("Title")
+                        local sectionMatch = false
+                        
+                        -- Check if section title matches search
+                        if sectionTitle and string.find(string.lower(sectionTitle.Text), searchText) then
+                            sectionMatch = true
+                        end
+                        
+                        if sectionContent then
+                            for _, element in ipairs(sectionContent:GetChildren()) do
+                                if element:IsA("Frame") then
+                                    local label = element:FindFirstChild("Label")
+                                    
+                                    if label and label:IsA("TextLabel") then
+                                        if searchText == "" or sectionMatch or string.find(string.lower(label.Text), searchText) then
+                                            element.Visible = true
+                                        else
+                                            element.Visible = false
+                                        end
+                                    end
+                                end
+                            end
+                            
+                            -- Show section if search is empty or section title matches
+                            if sectionTitle then
+                                sectionTitle.Visible = (searchText == "" or sectionMatch)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
     
     function Window:CreateTab(name, icon)
         -- Create tab button in sidebar
@@ -1078,8 +1306,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
         -- Create tab content
         local TabContent = createInstance("ScrollingFrame", {
             Name = name .. "Content",
-            Size = UDim2.new(1, -40, 1, -20),
-            Position = UDim2.new(0, 20, 0, 10),
+            Size = UDim2.new(1, -20, 1, 0),
+            Position = UDim2.new(0, 10, 0, 0),
             BackgroundTransparency = 1,
             ScrollBarThickness = 2,
             ScrollBarImageColor3 = SECONDARY_TEXT_COLOR,
@@ -1118,7 +1346,6 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 TabContent.Visible = true
                 
                 SelectedTab = name
-                TabTitle.Text = name
             end
         end)
         
@@ -1141,7 +1368,6 @@ function UILibrary:CreateWindow(title, keySystemOptions)
             TabContent.Visible = true
             
             SelectedTab = name
-            TabTitle.Text = name
         end
         
         -- Tab content creation functions
@@ -1225,10 +1451,14 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 local ToggleButton = createInstance("Frame", {
                     Name = "Button",
                     Size = UDim2.new(0, 40, 0, 20),
+                      {
+                    Name = "Button",
+                    Size = UDim2.new(0, 40, 0, 20),
                     Position = UDim2.new(1, -45, 0.5, -10),
                     BackgroundColor3 = defaultState and TOGGLE_COLOR or TOGGLE_OFF_COLOR,
                     Parent = Toggle
                 })
+
                 createRoundedCorner(ToggleButton, 10)
                 createStroke(ToggleButton, Color3.fromRGB(50, 50, 50), 1, 0)
                 
@@ -1304,7 +1534,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 
                 local SliderLabel = createInstance("TextLabel", {
                     Name = "Label",
-                    Size = UDim2.new(1, -70, 0, 20),
+                    Size = UDim2.new(1, -50, 0, 20),
                     BackgroundTransparency = 1,
                     Text = sliderName,
                     TextColor3 = SECONDARY_TEXT_COLOR,
@@ -1316,8 +1546,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 
                 local SliderValue = createInstance("TextLabel", {
                     Name = "Value",
-                    Size = UDim2.new(0, 60, 0, 20),
-                    Position = UDim2.new(1, -60, 0, 0),
+                    Size = UDim2.new(0, 40, 0, 20),
+                    Position = UDim2.new(1, -40, 0, 0),
                     BackgroundTransparency = 1,
                     Text = tostring(default),
                     TextColor3 = SECONDARY_TEXT_COLOR,
@@ -1467,11 +1697,12 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     BackgroundColor3 = DROPDOWN_BACKGROUND,
                     Text = "",
                     AutoButtonColor = false,
+                    ZIndex = 2,
                     Parent = Dropdown
                 })
                 createRoundedCorner(DropdownButton, 4)
                 createStroke(DropdownButton, Color3.fromRGB(50, 50, 50), 1, 0)
-                createStroke(DropdownButton, Color3.fromRGB(50, 50, 50), 1, 0)
+                
                 local DropdownText = createInstance("TextLabel", {
                     Name = "Text",
                     Size = UDim2.new(1, -30, 1, 0),
@@ -1482,6 +1713,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     TextSize = 14,
                     Font = Enum.Font.Gotham,
                     TextXAlignment = Enum.TextXAlignment.Left,
+                    ZIndex = 2,
                     Parent = DropdownButton
                 })
                 
@@ -1492,18 +1724,19 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     BackgroundTransparency = 1,
                     Image = "rbxassetid://6031091004",
                     ImageColor3 = SECONDARY_TEXT_COLOR,
+                    ZIndex = 2,
                     Parent = DropdownButton
                 })
                 
                 local DropdownMenu = createInstance("Frame", {
                     Name = "Menu",
                     Size = UDim2.new(1, 0, 0, 0),
-                    Position = UDim2.new(0, 0, 1, 0),
+                    Position = UDim2.new(0, 0, 1, 5),
                     BackgroundColor3 = DROPDOWN_BACKGROUND,
                     ClipsDescendants = true,
                     Visible = false,
-                    ZIndex = 5,
-                    Parent = DropdownButton
+                    ZIndex = 10,
+                    Parent = Dropdown
                 })
                 createRoundedCorner(DropdownMenu, 4)
                 createStroke(DropdownMenu, Color3.fromRGB(50, 50, 50), 1, 0)
@@ -1514,7 +1747,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     BackgroundTransparency = 1,
                     ScrollBarThickness = 2,
                     ScrollBarImageColor3 = SECONDARY_TEXT_COLOR,
-                    ZIndex = 5,
+                    ZIndex = 10,
                     Parent = DropdownMenu
                 })
                 
@@ -1564,7 +1797,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                         TextColor3 = item == selectedItem and ACCENT_COLOR or SECONDARY_TEXT_COLOR,
                         TextSize = 14,
                         Font = Enum.Font.Gotham,
-                        ZIndex = 5,
+                        ZIndex = 10,
                         Parent = DropdownList
                     })
                     
@@ -1676,7 +1909,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                                 TextColor3 = item == selectedItem and ACCENT_COLOR or SECONDARY_TEXT_COLOR,
                                 TextSize = 14,
                                 Font = Enum.Font.Gotham,
-                                ZIndex = 5,
+                                ZIndex = 10,
                                 Parent = DropdownList
                             })
                             
@@ -1726,7 +1959,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Name = boxName .. "TextBox",
                     Size = UDim2.new(1, 0, 0, 50),
                     BackgroundTransparency = 1,
-                    Parent = SectionContent
+                    Parent = SectionContent,
+                    ZIndex = 1
                 })
                 
                 local TextBoxLabel = createInstance("TextLabel", {
@@ -1738,7 +1972,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     TextSize = 14,
                     Font = Enum.Font.Gotham,
                     TextXAlignment = Enum.TextXAlignment.Left,
-                    Parent = TextBox
+                    Parent = TextBox,
+                    ZIndex = 1
                 })
                 
                 local TextBoxFrame = createInstance("Frame", {
@@ -1746,7 +1981,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Size = UDim2.new(1, 0, 0, 30),
                     Position = UDim2.new(0, 0, 0, 20),
                     BackgroundColor3 = DROPDOWN_BACKGROUND,
-                    Parent = TextBox
+                    Parent = TextBox,
+                    ZIndex = 1
                 })
                 createRoundedCorner(TextBoxFrame, 4)
                 createStroke(TextBoxFrame, Color3.fromRGB(50, 50, 50), 1, 0)
@@ -1758,7 +1994,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     BackgroundTransparency = 1,
                     Image = "rbxassetid://6764432408",
                     ImageColor3 = SECONDARY_TEXT_COLOR,
-                    Parent = TextBoxFrame
+                    Parent = TextBoxFrame,
+                    ZIndex = 1
                 })
                 
                 local TextBoxInput = createInstance("TextBox", {
@@ -1774,7 +2011,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Font = Enum.Font.Gotham,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     ClearTextOnFocus = false,
-                    Parent = TextBoxFrame
+                    Parent = TextBoxFrame,
+                    ZIndex = 1
                 })
                 
                 TextBoxInput.FocusLost:Connect(function(enterPressed)
@@ -1808,14 +2046,14 @@ function UILibrary:CreateWindow(title, keySystemOptions)
             function SectionObj:CreateColorPicker(pickerName, defaultColor, callback)
                 local ColorPicker = createInstance("Frame", {
                     Name = pickerName .. "ColorPicker",
-                    Size = UDim2.new(1, 0, 0, 50),
+                    Size = UDim2.new(1, 0, 0, 30),
                     BackgroundTransparency = 1,
                     Parent = SectionContent
                 })
                 
                 local ColorPickerLabel = createInstance("TextLabel", {
                     Name = "Label",
-                    Size = UDim2.new(1, -60, 0, 20),
+                    Size = UDim2.new(1, -40, 1, 0),
                     BackgroundTransparency = 1,
                     Text = pickerName,
                     TextColor3 = SECONDARY_TEXT_COLOR,
@@ -1827,8 +2065,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 
                 local ColorDisplay = createInstance("TextButton", {
                     Name = "Display",
-                    Size = UDim2.new(0, 30, 0, 30),
-                    Position = UDim2.new(1, -40, 0, 0),
+                    Size = UDim2.new(0, 24, 0, 24),
+                    Position = UDim2.new(1, -30, 0.5, -12),
                     BackgroundColor3 = defaultColor or Color3.fromRGB(255, 0, 0),
                     Text = "",
                     AutoButtonColor = false,
@@ -1855,6 +2093,11 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 -- Show/hide color picker on click
                 ColorDisplay.MouseButton1Click:Connect(function()
                     colorPickerInstance.Gui.Visible = not colorPickerInstance.Gui.Visible
+                    
+                    -- Position the color picker properly
+                    if colorPickerInstance.Gui.Visible then
+                        colorPickerInstance.Gui.Position = UDim2.new(0, ColorDisplay.AbsolutePosition.X + ColorDisplay.AbsoluteSize.X + 10, 0, ColorDisplay.AbsolutePosition.Y)
+                    end
                 end)
                 
                 -- Register UI element for config saving
@@ -1938,6 +2181,84 @@ function UILibrary:CreateWindow(title, keySystemOptions)
         end
         
         return Tab
+    end
+    
+    -- ESP Functions
+    function Window:CreateESP()
+        -- Initialize ESP
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                createESPObject(player)
+            end
+        end
+        
+        Players.PlayerAdded:Connect(function(player)
+            createESPObject(player)
+        end)
+        
+        Players.PlayerRemoving:Connect(function(player)
+            removeESPObject(player)
+        end)
+        
+        -- Update ESP
+        RunService.RenderStepped:Connect(updateESP)
+        
+        -- Return ESP settings
+        return {
+            Enabled = function(state)
+                ESPEnabled = state
+            end,
+            BoxEnabled = function(state)
+                ESPSettings.BoxEnabled = state
+            end,
+            NameEnabled = function(state)
+                ESPSettings.NameEnabled = state
+            end,
+            DistanceEnabled = function(state)
+                ESPSettings.DistanceEnabled = state
+            end,
+            TracerEnabled = function(state)
+                ESPSettings.TracerEnabled = state
+            end,
+            HealthEnabled = function(state)
+                ESPSettings.HealthEnabled = state
+            end,
+            TeamEnabled = function(state)
+                ESPSettings.TeamEnabled = state
+            end,
+            TeamColor = function(state)
+                ESPSettings.TeamColor = state
+            end,
+            BoxColor = function(color)
+                ESPSettings.BoxColor = color
+            end,
+            NameColor = function(color)
+                ESPSettings.NameColor = color
+            end,
+            DistanceColor = function(color)
+                ESPSettings.DistanceColor = color
+            end,
+            TracerColor = function(color)
+                ESPSettings.TracerColor = color
+            end,
+            MaxDistance = function(distance)
+                ESPSettings.MaxDistance = distance
+            end,
+            TextSize = function(size)
+                ESPSettings.TextSize = size
+            end,
+            BoxThickness = function(thickness)
+                ESPSettings.BoxThickness = thickness
+            end,
+            TracerThickness = function(thickness)
+                ESPSettings.TracerThickness = thickness
+            end,
+            TracerOrigin = function(origin)
+                if origin == "Bottom" or origin == "Top" or origin == "Mouse" then
+                    ESPSettings.TracerOrigin = origin
+                end
+            end
+        }
     end
     
     -- Configuration functions
