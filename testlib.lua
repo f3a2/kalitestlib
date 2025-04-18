@@ -21,7 +21,7 @@ local SIDEBAR_COLOR = Color3.fromRGB(10, 10, 10)
 local ACCENT_COLOR = Color3.fromRGB(255, 255, 255)
 local TEXT_COLOR = Color3.fromRGB(255, 255, 255)
 local SECONDARY_TEXT_COLOR = Color3.fromRGB(180, 180, 180)
-local TOGGLE_COLOR = Color3.fromRGB(255, 255, 255)
+local TOGGLE_COLOR = Color3.fromRGB(0, 170, 255)
 local TOGGLE_OFF_COLOR = Color3.fromRGB(60, 60, 60)
 local SLIDER_BACKGROUND = Color3.fromRGB(40, 40, 40)
 local SLIDER_FILL = Color3.fromRGB(255, 255, 255)
@@ -116,7 +116,7 @@ local function createColorPicker(parent, defaultColor, callback)
         BackgroundColor3 = BACKGROUND_COLOR,
         BorderSizePixel = 0,
         Visible = false,
-        ZIndex = 20,
+        ZIndex = 100,
         Parent = CoreGui
     })
     createRoundedCorner(ColorPickerGui, 6)
@@ -130,7 +130,7 @@ local function createColorPicker(parent, defaultColor, callback)
         TextColor3 = TEXT_COLOR,
         TextSize = 14,
         Font = Enum.Font.GothamSemibold,
-        ZIndex = 20,
+        ZIndex = 100,
         Parent = ColorPickerGui
     })
     
@@ -141,7 +141,7 @@ local function createColorPicker(parent, defaultColor, callback)
         Position = UDim2.new(0, 10, 0, 130),
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
-        ZIndex = 20,
+        ZIndex = 100,
         Parent = ColorPickerGui
     })
     createRoundedCorner(HueFrame, 4)
@@ -165,7 +165,7 @@ local function createColorPicker(parent, defaultColor, callback)
         Size = UDim2.new(0, 4, 1, 0),
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
-        ZIndex = 21,
+        ZIndex = 101,
         Parent = HueFrame
     })
     createRoundedCorner(HueSelector, 2)
@@ -177,7 +177,7 @@ local function createColorPicker(parent, defaultColor, callback)
         Position = UDim2.new(0, 10, 0, 35),
         BackgroundColor3 = Color3.fromRGB(255, 0, 0),
         BorderSizePixel = 0,
-        ZIndex = 20,
+        ZIndex = 100,
         Parent = ColorPickerGui
     })
     createRoundedCorner(SVFrame, 4)
@@ -203,7 +203,7 @@ local function createColorPicker(parent, defaultColor, callback)
         BackgroundColor3 = Color3.fromRGB(0, 0, 0),
         BackgroundTransparency = 0,
         BorderSizePixel = 0,
-        ZIndex = 21,
+        ZIndex = 101,
         Parent = SVFrame
     })
     createRoundedCorner(ValueFrame, 4)
@@ -228,7 +228,7 @@ local function createColorPicker(parent, defaultColor, callback)
         AnchorPoint = Vector2.new(0.5, 0.5),
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
-        ZIndex = 22,
+        ZIndex = 102,
         Parent = SVFrame
     })
     createRoundedCorner(SVSelector, 8)
@@ -240,7 +240,7 @@ local function createColorPicker(parent, defaultColor, callback)
         Size = UDim2.new(1, -20, 0, 25),
         Position = UDim2.new(0, 10, 0, 155),
         BackgroundTransparency = 1,
-        ZIndex = 20,
+        ZIndex = 100,
         Parent = ColorPickerGui
     })
     
@@ -255,7 +255,7 @@ local function createColorPicker(parent, defaultColor, callback)
         TextSize = 12,
         Font = Enum.Font.Gotham,
         ClearTextOnFocus = false,
-        ZIndex = 20,
+        ZIndex = 100,
         Parent = RGBFrame
     })
     createRoundedCorner(RInput, 4)
@@ -271,7 +271,7 @@ local function createColorPicker(parent, defaultColor, callback)
         TextSize = 12,
         Font = Enum.Font.Gotham,
         ClearTextOnFocus = false,
-        ZIndex = 20,
+        ZIndex = 100,
         Parent = RGBFrame
     })
     createRoundedCorner(GInput, 4)
@@ -287,7 +287,7 @@ local function createColorPicker(parent, defaultColor, callback)
         TextSize = 12,
         Font = Enum.Font.Gotham,
         ClearTextOnFocus = false,
-        ZIndex = 20,
+        ZIndex = 100,
         Parent = RGBFrame
     })
     createRoundedCorner(BInput, 4)
@@ -303,7 +303,7 @@ local function createColorPicker(parent, defaultColor, callback)
         TextSize = 12,
         Font = Enum.Font.Gotham,
         ClearTextOnFocus = false,
-        ZIndex = 20,
+        ZIndex = 100,
         Parent = RGBFrame
     })
     createRoundedCorner(HexInput, 4)
@@ -641,10 +641,13 @@ local ESPSettings = {
     HealthEnabled = false,
     TeamEnabled = false,
     TeamColor = false,
+    VisibleCheck = false,
     BoxColor = Color3.fromRGB(255, 255, 255),
     NameColor = Color3.fromRGB(255, 255, 255),
     DistanceColor = Color3.fromRGB(255, 255, 255),
     TracerColor = Color3.fromRGB(255, 255, 255),
+    VisibleColor = Color3.fromRGB(0, 255, 0),
+    NotVisibleColor = Color3.fromRGB(255, 0, 0),
     MaxDistance = 1000,
     TextSize = 14,
     BoxThickness = 1,
@@ -666,6 +669,14 @@ local function createESPObject(player)
     esp.Box.Thickness = ESPSettings.BoxThickness
     esp.Box.Filled = false
     esp.Box.Transparency = 1
+    
+    -- Box outline for better visibility
+    esp.BoxOutline = Drawing.new("Square")
+    esp.BoxOutline.Visible = false
+    esp.BoxOutline.Color = Color3.fromRGB(0, 0, 0)
+    esp.BoxOutline.Thickness = ESPSettings.BoxThickness + 1
+    esp.BoxOutline.Filled = false
+    esp.BoxOutline.Transparency = 1
     
     -- Name ESP
     esp.Name = Drawing.new("Text")
@@ -695,29 +706,27 @@ local function createESPObject(player)
     esp.Tracer.Transparency = 1
     
     -- Health Bar Background
-    esp.HealthBG = Drawing.new("Square")
+    esp.HealthBG = Drawing.new("Line")
     esp.HealthBG.Visible = false
     esp.HealthBG.Color = Color3.fromRGB(0, 0, 0)
-    esp.HealthBG.Thickness = 1
-    esp.HealthBG.Filled = true
+    esp.HealthBG.Thickness = 3
     esp.HealthBG.Transparency = 0.5
     
     -- Health Bar
-    esp.Health = Drawing.new("Square")
+    esp.Health = Drawing.new("Line")
     esp.Health.Visible = false
     esp.Health.Thickness = 1
-    esp.Health.Filled = true
     esp.Health.Transparency = 1
     
-    -- Team Text
-    esp.Team = Drawing.new("Text")
-    esp.Team.Visible = false
-    esp.Team.Color = ESPSettings.NameColor
-    esp.Team.Size = ESPSettings.TextSize
-    esp.Team.Center = true
-    esp.Team.Outline = true
-    esp.Team.OutlineColor = Color3.fromRGB(0, 0, 0)
-    esp.Team.Font = 2 -- Enum.Font.Code
+    -- Visible Text
+    esp.Visible = Drawing.new("Text")
+    esp.Visible.Visible = false
+    esp.Visible.Color = ESPSettings.VisibleColor
+    esp.Visible.Size = ESPSettings.TextSize
+    esp.Visible.Center = true
+    esp.Visible.Outline = true
+    esp.Visible.OutlineColor = Color3.fromRGB(0, 0, 0)
+    esp.Visible.Font = 2 -- Enum.Font.Code
     
     ESPObjects[player] = esp
     
@@ -737,6 +746,17 @@ local function removeESPObject(player)
     end
 end
 
+local function isPlayerVisible(player)
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return false end
+    
+    local hrp = character.HumanoidRootPart
+    local ray = Ray.new(workspace.CurrentCamera.CFrame.Position, hrp.Position - workspace.CurrentCamera.CFrame.Position)
+    local hit, position = workspace:FindPartOnRayWithIgnoreList(ray, {LocalPlayer.Character, character})
+    
+    return hit == nil or hit:IsDescendantOf(character)
+end
+
 local function updateESP()
     for player, esp in pairs(ESPObjects) do
         if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
@@ -749,32 +769,66 @@ local function updateESP()
                 continue
             end
             
-            local vector, onScreen = workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position)
-            local distance = (humanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
+            local rootPos = humanoidRootPart.Position
+            local headPos = head.Position + Vector3.new(0, 0.5, 0)
+            local legPos = rootPos - Vector3.new(0, 3, 0)
             
-            if onScreen and distance <= ESPSettings.MaxDistance and ESPEnabled then
-                -- Calculate box size based on distance
-                local size = 1 / (vector.Z * 0.01) * 2
-                local boxSize = Vector2.new(size, size * 1.5)
-                local boxPosition = Vector2.new(vector.X - size / 2, vector.Y - size / 2)
+            local rootVector, rootOnScreen = workspace.CurrentCamera:WorldToViewportPoint(rootPos)
+            local headVector, headOnScreen = workspace.CurrentCamera:WorldToViewportPoint(headPos)
+            local legVector, legOnScreen = workspace.CurrentCamera:WorldToViewportPoint(legPos)
+            
+            local distance = (rootPos - workspace.CurrentCamera.CFrame.Position).Magnitude
+            
+            if rootOnScreen and distance <= ESPSettings.MaxDistance and ESPEnabled then
+                -- Calculate box size based on character dimensions
+                local boxSize = Vector2.new(
+                    math.max(math.abs(headVector.X - legVector.X) * 2, 3),
+                    math.abs(headVector.Y - legVector.Y) * 1.2
+                )
+                local boxPosition = Vector2.new(
+                    rootVector.X - boxSize.X / 2,
+                    rootVector.Y - boxSize.Y / 2
+                )
+                
+                -- Check if player is visible
+                local isVisible = ESPSettings.VisibleCheck and isPlayerVisible(player)
+                local visibleText = isVisible and "Visible" or "Not Visible"
+                local visibleColor = isVisible and ESPSettings.VisibleColor or ESPSettings.NotVisibleColor
                 
                 -- Update box
+                esp.BoxOutline.Visible = ESPSettings.BoxEnabled
+                esp.BoxOutline.Size = boxSize
+                esp.BoxOutline.Position = boxPosition
+                
                 esp.Box.Visible = ESPSettings.BoxEnabled
                 esp.Box.Size = boxSize
                 esp.Box.Position = boxPosition
                 esp.Box.Color = ESPSettings.TeamColor and player.TeamColor.Color or ESPSettings.BoxColor
+                esp.Box.Thickness = ESPSettings.BoxThickness
                 
                 -- Update name
                 esp.Name.Visible = ESPSettings.NameEnabled
-                esp.Name.Position = Vector2.new(vector.X, vector.Y - boxSize.Y / 2 - esp.Name.TextBounds.Y - 2)
+                esp.Name.Position = Vector2.new(rootVector.X, boxPosition.Y - esp.Name.TextBounds.Y - 2)
                 esp.Name.Text = player.Name
                 esp.Name.Color = ESPSettings.TeamColor and player.TeamColor.Color or ESPSettings.NameColor
+                esp.Name.Size = ESPSettings.TextSize
                 
                 -- Update distance
                 esp.Distance.Visible = ESPSettings.DistanceEnabled
-                esp.Distance.Position = Vector2.new(vector.X, vector.Y + boxSize.Y / 2 + 2)
+                esp.Distance.Position = Vector2.new(rootVector.X, boxPosition.Y + boxSize.Y + 2)
                 esp.Distance.Text = math.floor(distance) .. " studs"
                 esp.Distance.Color = ESPSettings.TeamColor and player.TeamColor.Color or ESPSettings.DistanceColor
+                esp.Distance.Size = ESPSettings.TextSize
+                
+                -- Update visible text
+                esp.Visible.Visible = ESPSettings.VisibleCheck
+                esp.Visible.Position = Vector2.new(
+                    rootVector.X, 
+                    boxPosition.Y + boxSize.Y + (ESPSettings.DistanceEnabled and esp.Distance.TextBounds.Y + 2 or 0) + 2
+                )
+                esp.Visible.Text = visibleText
+                esp.Visible.Color = visibleColor
+                esp.Visible.Size = ESPSettings.TextSize
                 
                 -- Update tracer
                 esp.Tracer.Visible = ESPSettings.TracerEnabled
@@ -789,8 +843,9 @@ local function updateESP()
                 end
                 
                 esp.Tracer.From = tracerStart
-                esp.Tracer.To = Vector2.new(vector.X, vector.Y)
+                esp.Tracer.To = Vector2.new(rootVector.X, rootVector.Y)
                 esp.Tracer.Color = ESPSettings.TeamColor and player.TeamColor.Color or ESPSettings.TracerColor
+                esp.Tracer.Thickness = ESPSettings.TracerThickness
                 
                 -- Update health bar
                 if ESPSettings.HealthEnabled and humanoid then
@@ -798,13 +853,17 @@ local function updateESP()
                     local maxHealth = humanoid.MaxHealth
                     local healthPercent = math.clamp(health / maxHealth, 0, 1)
                     
+                    -- Position health bar to the left of the box
+                    local healthBarHeight = boxSize.Y
+                    local healthBarPos = Vector2.new(boxPosition.X - 5, boxPosition.Y)
+                    
                     esp.HealthBG.Visible = true
-                    esp.HealthBG.Size = Vector2.new(4, boxSize.Y)
-                    esp.HealthBG.Position = Vector2.new(boxPosition.X - 6, boxPosition.Y)
+                    esp.HealthBG.From = Vector2.new(healthBarPos.X, healthBarPos.Y)
+                    esp.HealthBG.To = Vector2.new(healthBarPos.X, healthBarPos.Y + healthBarHeight)
                     
                     esp.Health.Visible = true
-                    esp.Health.Size = Vector2.new(4, boxSize.Y * healthPercent)
-                    esp.Health.Position = Vector2.new(boxPosition.X - 6, boxPosition.Y + boxSize.Y * (1 - healthPercent))
+                    esp.Health.From = Vector2.new(healthBarPos.X, healthBarPos.Y + healthBarHeight * (1 - healthPercent))
+                    esp.Health.To = Vector2.new(healthBarPos.X, healthBarPos.Y + healthBarHeight)
                     
                     -- Health color gradient: red to green
                     esp.Health.Color = Color3.fromRGB(255 * (1 - healthPercent), 255 * healthPercent, 0)
@@ -812,35 +871,27 @@ local function updateESP()
                     esp.HealthBG.Visible = false
                     esp.Health.Visible = false
                 end
-                
-                -- Update team text
-                if ESPSettings.TeamEnabled then
-                    esp.Team.Visible = true
-                    esp.Team.Position = Vector2.new(vector.X, vector.Y + boxSize.Y / 2 + (ESPSettings.DistanceEnabled and esp.Distance.TextBounds.Y + 2 or 0) + 2)
-                    esp.Team.Text = player.Team and player.Team.Name or "No Team"
-                    esp.Team.Color = player.Team and player.TeamColor.Color or Color3.fromRGB(255, 255, 255)
-                else
-                    esp.Team.Visible = false
-                end
             else
                 -- Hide ESP if player is not on screen or too far
+                esp.BoxOutline.Visible = false
                 esp.Box.Visible = false
                 esp.Name.Visible = false
                 esp.Distance.Visible = false
                 esp.Tracer.Visible = false
                 esp.HealthBG.Visible = false
                 esp.Health.Visible = false
-                esp.Team.Visible = false
+                esp.Visible.Visible = false
             end
         else
             -- Hide ESP if player character doesn't exist
+            esp.BoxOutline.Visible = false
             esp.Box.Visible = false
             esp.Name.Visible = false
             esp.Distance.Visible = false
             esp.Tracer.Visible = false
             esp.HealthBG.Visible = false
             esp.Health.Visible = false
-            esp.Team.Visible = false
+            esp.Visible.Visible = false
         end
     end
 end
@@ -1170,11 +1221,15 @@ function UILibrary:CreateWindow(title, keySystemOptions)
     })
     
     -- Create content container
-    local ContentContainer = createInstance("Frame", {
+    local ContentContainer = createInstance("ScrollingFrame", {
         Name = "ContentContainer",
         Size = UDim2.new(1, 0, 1, -40),
         Position = UDim2.new(0, 0, 0, 40),
         BackgroundTransparency = 1,
+        ScrollBarThickness = 4,
+        ScrollBarImageColor3 = Color3.fromRGB(60, 60, 60),
+        ScrollingDirection = Enum.ScrollingDirection.Y,
+        CanvasSize = UDim2.new(0, 0, 0, 1000), -- Set initial canvas size to allow scrolling
         Parent = ContentArea
     })
     
@@ -1304,16 +1359,12 @@ function UILibrary:CreateWindow(title, keySystemOptions)
         })
         
         -- Create tab content
-        local TabContent = createInstance("ScrollingFrame", {
+        local TabContent = createInstance("Frame", {
             Name = name .. "Content",
-            Size = UDim2.new(1, -20, 1, 0),
+            Size = UDim2.new(1, -20, 0, 0),
             Position = UDim2.new(0, 10, 0, 0),
             BackgroundTransparency = 1,
-            ScrollBarThickness = 2,
-            ScrollBarImageColor3 = SECONDARY_TEXT_COLOR,
-            ScrollingDirection = Enum.ScrollingDirection.Y,
-            AutomaticCanvasSize = Enum.AutomaticSize.Y,
-            CanvasSize = UDim2.new(0, 0, 0, 0),
+            AutomaticSize = Enum.AutomaticSize.Y,
             Visible = false,
             Parent = ContentContainer
         })
@@ -1451,13 +1502,10 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 local ToggleButton = createInstance("Frame", {
                     Name = "Button",
                     Size = UDim2.new(0, 40, 0, 20),
-                    Name = "Button",
-                    Size = UDim2.new(0, 40, 0, 20),
                     Position = UDim2.new(1, -45, 0.5, -10),
                     BackgroundColor3 = defaultState and TOGGLE_COLOR or TOGGLE_OFF_COLOR,
                     Parent = Toggle
                 })
-
                 createRoundedCorner(ToggleButton, 10)
                 createStroke(ToggleButton, Color3.fromRGB(50, 50, 50), 1, 0)
                 
@@ -1674,7 +1722,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Name = dropdownName .. "Dropdown",
                     Size = UDim2.new(1, 0, 0, 50),
                     BackgroundTransparency = 1,
-                    Parent = SectionContent
+                    Parent = SectionContent,
+                    ZIndex = 1
                 })
                 
                 local DropdownLabel = createInstance("TextLabel", {
@@ -1686,7 +1735,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     TextSize = 14,
                     Font = Enum.Font.Gotham,
                     TextXAlignment = Enum.TextXAlignment.Left,
-                    Parent = Dropdown
+                    Parent = Dropdown,
+                    ZIndex = 1
                 })
                 
                 local DropdownButton = createInstance("TextButton", {
@@ -2228,29 +2278,74 @@ function UILibrary:CreateWindow(title, keySystemOptions)
             TeamColor = function(state)
                 ESPSettings.TeamColor = state
             end,
+            VisibleCheck = function(state)
+                ESPSettings.VisibleCheck = state
+            end,
             BoxColor = function(color)
                 ESPSettings.BoxColor = color
+                for _, esp in pairs(ESPObjects) do
+                    if esp.Box then
+                        esp.Box.Color = color
+                    end
+                end
             end,
             NameColor = function(color)
                 ESPSettings.NameColor = color
+                for _, esp in pairs(ESPObjects) do
+                    if esp.Name then
+                        esp.Name.Color = color
+                    end
+                end
             end,
             DistanceColor = function(color)
                 ESPSettings.DistanceColor = color
+                for _, esp in pairs(ESPObjects) do
+                    if esp.Distance then
+                        esp.Distance.Color = color
+                    end
+                end
             end,
             TracerColor = function(color)
                 ESPSettings.TracerColor = color
+                for _, esp in pairs(ESPObjects) do
+                    if esp.Tracer then
+                        esp.Tracer.Color = color
+                    end
+                end
+            end,
+            VisibleColor = function(color)
+                ESPSettings.VisibleColor = color
+            end,
+            NotVisibleColor = function(color)
+                ESPSettings.NotVisibleColor = color
             end,
             MaxDistance = function(distance)
                 ESPSettings.MaxDistance = distance
             end,
             TextSize = function(size)
                 ESPSettings.TextSize = size
+                for _, esp in pairs(ESPObjects) do
+                    if esp.Name then esp.Name.Size = size end
+                    if esp.Distance then esp.Distance.Size = size end
+                    if esp.Visible then esp.Visible.Size = size end
+                end
             end,
             BoxThickness = function(thickness)
                 ESPSettings.BoxThickness = thickness
+                for _, esp in pairs(ESPObjects) do
+                    if esp.Box then
+                        esp.Box.Thickness = thickness
+                        esp.BoxOutline.Thickness = thickness + 1
+                    end
+                end
             end,
             TracerThickness = function(thickness)
                 ESPSettings.TracerThickness = thickness
+                for _, esp in pairs(ESPObjects) do
+                    if esp.Tracer then
+                        esp.Tracer.Thickness = thickness
+                    end
+                end
             end,
             TracerOrigin = function(origin)
                 if origin == "Bottom" or origin == "Top" or origin == "Mouse" then
