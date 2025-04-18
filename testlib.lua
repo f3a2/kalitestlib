@@ -16,15 +16,15 @@ local ViewportSize = workspace.CurrentCamera.ViewportSize
 local IsMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 
 -- Constants
-local BACKGROUND_COLOR = Color3.fromRGB(20, 20, 20)
-local SIDEBAR_COLOR = Color3.fromRGB(15, 15, 15)
-local ACCENT_COLOR = Color3.fromRGB(114, 111, 255)
+local BACKGROUND_COLOR = Color3.fromRGB(15, 15, 15)
+local SIDEBAR_COLOR = Color3.fromRGB(10, 10, 10)
+local ACCENT_COLOR = Color3.fromRGB(255, 255, 255)
 local TEXT_COLOR = Color3.fromRGB(255, 255, 255)
 local SECONDARY_TEXT_COLOR = Color3.fromRGB(180, 180, 180)
-local TOGGLE_COLOR = Color3.fromRGB(114, 111, 255)
+local TOGGLE_COLOR = Color3.fromRGB(255, 255, 255)
 local TOGGLE_OFF_COLOR = Color3.fromRGB(60, 60, 60)
 local SLIDER_BACKGROUND = Color3.fromRGB(40, 40, 40)
-local SLIDER_FILL = Color3.fromRGB(114, 111, 255)
+local SLIDER_FILL = Color3.fromRGB(255, 255, 255)
 local DROPDOWN_BACKGROUND = Color3.fromRGB(30, 30, 30)
 local BUTTON_COLOR = Color3.fromRGB(40, 40, 40)
 local BUTTON_HOVER_COLOR = Color3.fromRGB(50, 50, 50)
@@ -120,6 +120,7 @@ local function createColorPicker(parent, defaultColor, callback)
         Parent = parent
     })
     createRoundedCorner(ColorPickerGui, 6)
+    createStroke(ColorPickerGui, Color3.fromRGB(50, 50, 50), 1, 0)
     
     local ColorPickerTitle = createInstance("TextLabel", {
         Name = "Title",
@@ -524,6 +525,26 @@ local function createColorPicker(parent, defaultColor, callback)
         setColorFromHex(hex)
     end)
     
+    -- Close color picker when clicking outside
+    UserInputService.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            local mousePos = UserInputService:GetMouseLocation()
+            if ColorPickerGui.Visible and not (
+                mousePos.X >= ColorPickerGui.AbsolutePosition.X and
+                mousePos.X <= ColorPickerGui.AbsolutePosition.X + ColorPickerGui.AbsoluteSize.X and
+                mousePos.Y >= ColorPickerGui.AbsolutePosition.Y and
+                mousePos.Y <= ColorPickerGui.AbsolutePosition.Y + ColorPickerGui.AbsoluteSize.Y
+            ) and not (
+                mousePos.X >= parent.AbsolutePosition.X and
+                mousePos.X <= parent.AbsolutePosition.X + parent.AbsoluteSize.X and
+                mousePos.Y >= parent.AbsolutePosition.Y and
+                mousePos.Y <= parent.AbsolutePosition.Y + parent.AbsoluteSize.Y
+            ) then
+                ColorPickerGui.Visible = false
+            end
+        end
+    end)
+    
     return {
         Gui = ColorPickerGui,
         SetColor = function(color)
@@ -540,13 +561,13 @@ local function createColorPicker(parent, defaultColor, callback)
 end
 
 -- Configuration System Functions
-local function saveConfig(name, data)
+local function saveConfig(name)
     if not isfolder(ConfigSystem.Folder) then
         makefolder(ConfigSystem.Folder)
     end
     
     local success, encodedData = pcall(function()
-        return HttpService:JSONEncode(data)
+        return HttpService:JSONEncode(_G.UILibraryConfig)
     end)
     
     if success then
@@ -612,6 +633,11 @@ end
 
 -- Main Library Functions
 function UILibrary:CreateWindow(title, keySystemOptions)
+    -- Initialize global config table
+    if not _G.UILibraryConfig then
+        _G.UILibraryConfig = {}
+    end
+    
     -- Key System Check
     if keySystemOptions and keySystemOptions.Enabled then
         -- Create key system UI
@@ -631,6 +657,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
             Parent = KeySystemGui
         })
         createRoundedCorner(KeyFrame, 6)
+        createStroke(KeyFrame, Color3.fromRGB(50, 50, 50), 1, 0)
         
         local KeyTitle = createInstance("TextLabel", {
             Name = "KeyTitle",
@@ -678,7 +705,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
             Position = UDim2.new(0, 20, 0, 140),
             BackgroundColor3 = ACCENT_COLOR,
             Text = "Submit",
-            TextColor3 = TEXT_COLOR,
+            TextColor3 = BACKGROUND_COLOR,
             TextSize = 14,
             Font = Enum.Font.GothamSemibold,
             Parent = KeyFrame
@@ -779,14 +806,15 @@ function UILibrary:CreateWindow(title, keySystemOptions)
     -- Create main frame
     local MainFrame = createInstance("Frame", {
         Name = "MainFrame",
-        Size = UDim2.new(0, 700, 0, 500),
-        Position = UDim2.new(0.5, -350, 0.5, -250),
+        Size = UDim2.new(0, 600, 0, 400),
+        Position = UDim2.new(0.5, -300, 0.5, -200),
         BackgroundColor3 = BACKGROUND_COLOR,
         BorderSizePixel = 0,
         Parent = UILibraryGui,
         Visible = true
     })
     createRoundedCorner(MainFrame, 6)
+    createStroke(MainFrame, Color3.fromRGB(50, 50, 50), 1, 0)
     
     -- Create shadow
     local Shadow = createInstance("ImageLabel", {
@@ -806,7 +834,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
     -- Create sidebar
     local Sidebar = createInstance("Frame", {
         Name = "Sidebar",
-        Size = UDim2.new(0, 150, 1, 0),
+        Size = UDim2.new(0, 120, 1, 0),
         Position = UDim2.new(0, 0, 0, 0),
         BackgroundColor3 = SIDEBAR_COLOR,
         BorderSizePixel = 0,
@@ -873,8 +901,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
     -- Create content area
     local ContentArea = createInstance("Frame", {
         Name = "ContentArea",
-        Size = UDim2.new(1, -150, 1, 0),
-        Position = UDim2.new(0, 150, 0, 0),
+        Size = UDim2.new(1, -120, 1, 0),
+        Position = UDim2.new(0, 120, 0, 0),
         BackgroundTransparency = 1,
         Parent = MainFrame
     })
@@ -912,6 +940,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
         Parent = TopBar
     })
     createRoundedCorner(SearchFrame, 4)
+    createStroke(SearchFrame, Color3.fromRGB(50, 50, 50), 1, 0)
     
     local SearchLabel = createInstance("TextLabel", {
         Name = "SearchLabel",
@@ -1018,6 +1047,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
             Parent = TabButton
         })
         createRoundedCorner(TabButtonBackground, 4)
+        createStroke(TabButtonBackground, Color3.fromRGB(50, 50, 50), 1, 1)
         
         local TabButtonIcon
         if icon then
@@ -1200,6 +1230,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Parent = Toggle
                 })
                 createRoundedCorner(ToggleButton, 10)
+                createStroke(ToggleButton, Color3.fromRGB(50, 50, 50), 1, 0)
                 
                 local ToggleCircle = createInstance("Frame", {
                     Name = "Circle",
@@ -1224,6 +1255,9 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     if callback then
                         callback(state)
                     end
+                    
+                    -- Update config
+                    _G.UILibraryConfig[toggleName] = state
                 end
                 
                 ToggleButton.InputBegan:Connect(function(input)
@@ -1270,7 +1304,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 
                 local SliderLabel = createInstance("TextLabel", {
                     Name = "Label",
-                    Size = UDim2.new(1, -60, 0, 20),
+                    Size = UDim2.new(1, -70, 0, 20),
                     BackgroundTransparency = 1,
                     Text = sliderName,
                     TextColor3 = SECONDARY_TEXT_COLOR,
@@ -1282,8 +1316,8 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 
                 local SliderValue = createInstance("TextLabel", {
                     Name = "Value",
-                    Size = UDim2.new(0, 50, 0, 20),
-                    Position = UDim2.new(1, -50, 0, 0),
+                    Size = UDim2.new(0, 60, 0, 20),
+                    Position = UDim2.new(1, -60, 0, 0),
                     BackgroundTransparency = 1,
                     Text = tostring(default),
                     TextColor3 = SECONDARY_TEXT_COLOR,
@@ -1301,6 +1335,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Parent = Slider
                 })
                 createRoundedCorner(SliderBackground, 4)
+                createStroke(SliderBackground, Color3.fromRGB(50, 50, 50), 1, 0)
                 
                 local SliderFill = createInstance("Frame", {
                     Name = "Fill",
@@ -1318,6 +1353,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Parent = SliderBackground
                 })
                 createRoundedCorner(SliderKnob, 8)
+                createStroke(SliderKnob, Color3.fromRGB(50, 50, 50), 1, 0)
                 
                 local value = default
                 local isDragging = false
@@ -1341,6 +1377,9 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     if callback then
                         callback(value)
                     end
+                    
+                    -- Update config
+                    _G.UILibraryConfig[sliderName] = value
                 end
                 
                 SliderBackground.InputBegan:Connect(function(input)
@@ -1421,14 +1460,19 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Parent = Dropdown
                 })
                 
-                local DropdownButton = createInstance("Frame", {
+                local DropdownButton = createInstance("TextButton", {
                     Name = "Button",
                     Size = UDim2.new(1, 0, 0, 30),
                     Position = UDim2.new(0, 0, 0, 20),
                     BackgroundColor3 = DROPDOWN_BACKGROUND,
+                    Text = "",
+                    AutoButtonColor = false,
                     Parent = Dropdown
                 })
                 createRoundedCorner(DropdownButton, 4)
+                createStroke(DropdownButton, Color3.fromRGB(50, 50, 50), 1, 0)
+                  4)
+                createStroke(DropdownButton, Color3.fromRGB(50, 50, 50), 1, 0)
                 
                 local DropdownText = createInstance("TextLabel", {
                     Name = "Text",
@@ -1464,6 +1508,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Parent = DropdownButton
                 })
                 createRoundedCorner(DropdownMenu, 4)
+                createStroke(DropdownMenu, Color3.fromRGB(50, 50, 50), 1, 0)
                 
                 local DropdownList = createInstance("ScrollingFrame", {
                     Name = "List",
@@ -1515,7 +1560,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 for i, item in ipairs(items) do
                     local ItemButton = createInstance("TextButton", {
                         Name = "Item_" .. i,
-                        Size = UDim2.new(1, 0, 0, 25),
+                        Size = UDim2.new(1, -10, 0, 25),
                         BackgroundTransparency = 1,
                         Text = item,
                         TextColor3 = item == selectedItem and ACCENT_COLOR or SECONDARY_TEXT_COLOR,
@@ -1553,16 +1598,17 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                             if callback then
                                 callback(item)
                             end
+                            
+                            -- Update config
+                            _G.UILibraryConfig[dropdownName] = item
                         end
                         
                         updateDropdown()
                     end)
                 end
                 
-                DropdownButton.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        updateDropdown()
-                    end
+                DropdownButton.MouseButton1Click:Connect(function()
+                    updateDropdown()
                 end)
                 
                 -- Close dropdown when clicking elsewhere
@@ -1626,7 +1672,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                         for i, item in ipairs(items) do
                             local ItemButton = createInstance("TextButton", {
                                 Name = "Item_" .. i,
-                                Size = UDim2.new(1, 0, 0, 25),
+                                Size = UDim2.new(1, -10, 0, 25),
                                 BackgroundTransparency = 1,
                                 Text = item,
                                 TextColor3 = item == selectedItem and ACCENT_COLOR or SECONDARY_TEXT_COLOR,
@@ -1705,6 +1751,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Parent = TextBox
                 })
                 createRoundedCorner(TextBoxFrame, 4)
+                createStroke(TextBoxFrame, Color3.fromRGB(50, 50, 50), 1, 0)
                 
                 local EditIcon = createInstance("ImageLabel", {
                     Name = "EditIcon",
@@ -1736,6 +1783,9 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     if callback then
                         callback(TextBoxInput.Text, enterPressed)
                     end
+                    
+                    -- Update config
+                    _G.UILibraryConfig[boxName] = TextBoxInput.Text
                 end)
                 
                 -- Register UI element for config saving
@@ -1777,14 +1827,17 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Parent = ColorPicker
                 })
                 
-                local ColorDisplay = createInstance("Frame", {
+                local ColorDisplay = createInstance("TextButton", {
                     Name = "Display",
                     Size = UDim2.new(0, 30, 0, 30),
                     Position = UDim2.new(1, -40, 0, 0),
                     BackgroundColor3 = defaultColor or Color3.fromRGB(255, 0, 0),
+                    Text = "",
+                    AutoButtonColor = false,
                     Parent = ColorPicker
                 })
                 createRoundedCorner(ColorDisplay, 4)
+                createStroke(ColorDisplay, Color3.fromRGB(50, 50, 50), 1, 0)
                 
                 -- Create the color picker
                 local colorPickerInstance = createColorPicker(ColorDisplay, defaultColor or Color3.fromRGB(255, 0, 0), function(color)
@@ -1792,13 +1845,18 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     if callback then
                         callback(color)
                     end
+                    
+                    -- Update config
+                    _G.UILibraryConfig[pickerName] = {
+                        R = color.R,
+                        G = color.G,
+                        B = color.B
+                    }
                 end)
                 
                 -- Show/hide color picker on click
-                ColorDisplay.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        colorPickerInstance.Gui.Visible = not colorPickerInstance.Gui.Visible
-                    end
+                ColorDisplay.MouseButton1Click:Connect(function()
+                    colorPickerInstance.Gui.Visible = not colorPickerInstance.Gui.Visible
                 end)
                 
                 -- Register UI element for config saving
@@ -1833,13 +1891,16 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Parent = SectionContent
                 })
                 
-                local ButtonFrame = createInstance("Frame", {
+                local ButtonFrame = createInstance("TextButton", {
                     Name = "Frame",
                     Size = UDim2.new(1, 0, 1, 0),
                     BackgroundColor3 = BUTTON_COLOR,
+                    Text = "",
+                    AutoButtonColor = false,
                     Parent = Button
                 })
                 createRoundedCorner(ButtonFrame, 4)
+                createStroke(ButtonFrame, Color3.fromRGB(50, 50, 50), 1, 0)
                 
                 local ButtonLabel = createInstance("TextLabel", {
                     Name = "Label",
@@ -1852,20 +1913,24 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Parent = ButtonFrame
                 })
                 
-                ButtonFrame.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        createTween(ButtonFrame, {BackgroundColor3 = BUTTON_HOVER_COLOR}):Play()
-                        
-                        if callback then
-                            callback()
-                        end
+                ButtonFrame.MouseButton1Click:Connect(function()
+                    createTween(ButtonFrame, {BackgroundColor3 = BUTTON_HOVER_COLOR}):Play()
+                    
+                    if callback then
+                        callback()
                     end
+                    
+                    delay(0.2, function()
+                        createTween(ButtonFrame, {BackgroundColor3 = BUTTON_COLOR}):Play()
+                    end)
                 end)
                 
-                ButtonFrame.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        createTween(ButtonFrame, {BackgroundColor3 = BUTTON_COLOR}):Play()
-                    end
+                ButtonFrame.MouseEnter:Connect(function()
+                    createTween(ButtonFrame, {BackgroundColor3 = BUTTON_HOVER_COLOR}):Play()
+                end)
+                
+                ButtonFrame.MouseLeave:Connect(function()
+                    createTween(ButtonFrame, {BackgroundColor3 = BUTTON_COLOR}):Play()
                 end)
                 
                 return Button
@@ -1879,27 +1944,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
     
     -- Configuration functions
     function Window:SaveConfig(name)
-        local configData = {}
-        
-        for _, element in ipairs(UIElements) do
-            local value = element.Get()
-            
-            -- Convert Color3 values to tables for JSON serialization
-            if element.Type == "ColorPicker" then
-                value = {
-                    R = value.R,
-                    G = value.G,
-                    B = value.B
-                }
-            end
-            
-            configData[element.Tab .. "_" .. element.Section .. "_" .. element.Name] = {
-                Type = element.Type,
-                Value = value
-            }
-        end
-        
-        return saveConfig(name, configData)
+        return saveConfig(name)
     end
     
     function Window:LoadConfig(name)
@@ -1908,16 +1953,17 @@ function UILibrary:CreateWindow(title, keySystemOptions)
             return false
         end
         
+        _G.UILibraryConfig = configData
+        
         for _, element in ipairs(UIElements) do
-            local key = element.Tab .. "_" .. element.Section .. "_" .. element.Name
-            local data = configData[key]
+            local value = configData[element.Name]
             
-            if data then
-                if element.Type == "ColorPicker" and type(data.Value) == "table" then
+            if value ~= nil then
+                if element.Type == "ColorPicker" and type(value) == "table" then
                     -- Convert table back to Color3
-                    element.Set(Color3.new(data.Value.R, data.Value.G, data.Value.B))
+                    element.Set(Color3.new(value.R, value.G, value.B))
                 else
-                    element.Set(data.Value)
+                    element.Set(value)
                 end
             end
         end
