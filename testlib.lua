@@ -798,11 +798,46 @@ function UILibrary:CreateWindow(title, keySystemOptions)
         Parent = ContentArea
     })
     
+    -- Create window controls (minimize and close buttons)
+    local WindowControls = createInstance("Frame", {
+        Name = "WindowControls",
+        Size = UDim2.new(0, 60, 0, 30),
+        Position = UDim2.new(1, -70, 0.5, -15),
+        BackgroundTransparency = 1,
+        Parent = TopBar
+    })
+    
+    local MinimizeButton = createInstance("TextButton", {
+        Name = "MinimizeButton",
+        Size = UDim2.new(0, 25, 0, 25),
+        Position = UDim2.new(0, 0, 0, 0),
+        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+        Text = "-",
+        TextColor3 = TEXT_COLOR,
+        TextSize = 18,
+        Font = Enum.Font.GothamBold,
+        Parent = WindowControls
+    })
+    createRoundedCorner(MinimizeButton, 4)
+    
+    local CloseButton = createInstance("TextButton", {
+        Name = "CloseButton",
+        Size = UDim2.new(0, 25, 0, 25),
+        Position = UDim2.new(1, -25, 0, 0),
+        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+        Text = "×",
+        TextColor3 = TEXT_COLOR,
+        TextSize = 18,
+        Font = Enum.Font.GothamBold,
+        Parent = WindowControls
+    })
+    createRoundedCorner(CloseButton, 4)
+    
     -- Create search bar
     local SearchFrame = createInstance("Frame", {
         Name = "SearchFrame",
         Size = UDim2.new(0, 200, 0, 30),
-        Position = UDim2.new(1, -220, 0.5, -15),
+        Position = UDim2.new(1, -280, 0.5, -15),
         BackgroundColor3 = SIDEBAR_COLOR,
         BorderSizePixel = 0,
         Parent = TopBar
@@ -851,27 +886,59 @@ function UILibrary:CreateWindow(title, keySystemOptions)
     })
     
     -- Create mobile toggle button
-    local MobileToggle
-    if IsMobile then
-        MobileToggle = createInstance("ImageButton", {
-            Name = "MobileToggle",
-            Size = UDim2.new(0, 40, 0, 40),
-            Position = UDim2.new(0, 10, 0, 10),
-            BackgroundColor3 = BACKGROUND_COLOR,
-            Image = "rbxassetid://6031094670",
-            ImageColor3 = ACCENT_COLOR,
-            Parent = UILibraryGui
-        })
-        createRoundedCorner(MobileToggle, 8)
-        createStroke(MobileToggle, ACCENT_COLOR, 2, 0)
-        
-        -- Make mobile toggle draggable
-        makeOnlyTopDraggable(MobileToggle, MobileToggle)
-        
-        MobileToggle.MouseButton1Click:Connect(function()
-            MainFrame.Visible = not MainFrame.Visible
-        end)
+    local MobileToggle = createInstance("ImageButton", {
+        Name = "MobileToggle",
+        Size = UDim2.new(0, 40, 0, 40),
+        Position = UDim2.new(0, 10, 0, 10),
+        BackgroundColor3 = BACKGROUND_COLOR,
+        Image = "rbxassetid://6031094670",
+        ImageColor3 = ACCENT_COLOR,
+        Visible = false, -- Initially hidden, shown when minimized
+        Parent = UILibraryGui
+    })
+    createRoundedCorner(MobileToggle, 8)
+    createStroke(MobileToggle, ACCENT_COLOR, 2, 0)
+    
+    -- Make mobile toggle draggable
+    makeOnlyTopDraggable(MobileToggle, MobileToggle)
+    
+    -- Variables to track UI state
+    local isMinimized = false
+    local isVisible = true
+    
+    -- Function to toggle UI visibility
+    local function toggleVisibility()
+        isVisible = not isVisible
+        MainFrame.Visible = isVisible
+        MobileToggle.Visible = not isVisible
     end
+    
+    -- Function to minimize/maximize UI
+    local function toggleMinimize()
+        isMinimized = not isMinimized
+        
+        if isMinimized then
+            createTween(MainFrame, {Size = UDim2.new(0, 650, 0, 40)}):Play()
+            ContentContainer.Visible = false
+            SidebarContainer.Visible = false
+        else
+            createTween(MainFrame, {Size = UDim2.new(0, 650, 0, 400)}):Play()
+            ContentContainer.Visible = true
+            SidebarContainer.Visible = true
+        end
+    end
+    
+    -- Connect button events
+    MinimizeButton.MouseButton1Click:Connect(toggleMinimize)
+    CloseButton.MouseButton1Click:Connect(toggleVisibility)
+    MobileToggle.MouseButton1Click:Connect(toggleVisibility)
+    
+    -- Add keyboard shortcut (Left Control) to toggle UI
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftControl then
+            toggleVisibility()
+        end
+    end)
     
     -- Make only the top part of the UI draggable
     makeOnlyTopDraggable(MainFrame, TopBar)
@@ -1395,7 +1462,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     Parent = DropdownButton
                 })
                 
-                -- Create dropdown menu as a separate GUI to ensure it's always on top
+                -- Create dropdown menu
                 local DropdownMenu = createInstance("Frame", {
                     Name = "Menu",
                     Size = UDim2.new(1, 0, 0, 0),
@@ -1403,21 +1470,19 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                     BackgroundColor3 = DROPDOWN_BACKGROUND,
                     ClipsDescendants = true,
                     Visible = false,
-                    ZIndex = 9999, -- Extremely high Z-index to ensure it's on top of everything
-                    Parent = CoreGui -- Parent directly to CoreGui instead of the dropdown button
+                    ZIndex = 10, -- Higher Z-index to ensure it's on top
+                    Parent = DropdownButton
                 })
                 createRoundedCorner(DropdownMenu, 4)
                 createStroke(DropdownMenu, Color3.fromRGB(50, 50, 50), 1, 0)
-
-                -- Store reference to the dropdown button for positioning
-                local dropdownButtonRef = DropdownButton
-
-                -- Update the dropdown list and its children to have extremely high Z-index
-                local DropdownList = createInstance("Frame", {
+                
+                local DropdownList = createInstance("ScrollingFrame", {
                     Name = "List",
                     Size = UDim2.new(1, 0, 1, 0),
                     BackgroundTransparency = 1,
-                    ZIndex = 9999,
+                    ScrollBarThickness = 4,
+                    ScrollBarImageColor3 = Color3.fromRGB(60, 60, 60),
+                    ZIndex = 10,
                     Parent = DropdownMenu
                 })
                 
@@ -1438,30 +1503,23 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 local isOpen = false
                 local selectedItem = default
                 
-                -- Update the updateDropdown function to properly position the menu
                 local function updateDropdown()
                     isOpen = not isOpen
                     
                     if isOpen then
-                        -- Position the menu at the dropdown button's position
-                        DropdownMenu.Position = UDim2.new(
-                            0, 
-                            dropdownButtonRef.AbsolutePosition.X,
-                            0, 
-                            dropdownButtonRef.AbsolutePosition.Y + dropdownButtonRef.AbsoluteSize.Y + 5
-                        )
-                        DropdownMenu.Size = UDim2.new(0, dropdownButtonRef.AbsoluteSize.X, 0, 0)
-                        DropdownMenu.Visible = true
+                        -- Calculate the maximum height based on number of items
+                        local menuHeight = math.min(#items * 30 + 10, 150)
                         
-                        -- Animate the menu opening
-                        local menuHeight = math.min(#items * 30, 150)
-                        createTween(DropdownMenu, {Size = UDim2.new(0, dropdownButtonRef.AbsoluteSize.X, 0, menuHeight)}):Play()
+                        -- Show the menu
+                        DropdownMenu.Visible = true
+                        createTween(DropdownMenu, {Size = UDim2.new(1, 0, 0, menuHeight)}):Play()
                         createTween(DropdownArrow, {Rotation = 180}):Play()
                     else
-                        -- Animate the menu closing
-                        createTween(DropdownMenu, {Size = UDim2.new(0, dropdownButtonRef.AbsoluteSize.X, 0, 0)}):Play()
+                        -- Hide the menu
+                        createTween(DropdownMenu, {Size = UDim2.new(1, 0, 0, 0)}):Play()
                         createTween(DropdownArrow, {Rotation = 0}):Play()
                         
+                        -- Wait for animation to complete before hiding
                         delay(0.2, function()
                             if not isOpen then
                                 DropdownMenu.Visible = false
@@ -1480,7 +1538,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                         TextColor3 = item == selectedItem and ACCENT_COLOR or SECONDARY_TEXT_COLOR,
                         TextSize = 14,
                         Font = Enum.Font.Gotham,
-                        ZIndex = 10000, -- Even higher Z-index for the buttons
+                        ZIndex = 11, -- Even higher Z-index for the buttons
                         Parent = DropdownList
                     })
                     createRoundedCorner(ItemButton, 4)
@@ -1530,17 +1588,11 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 -- Close dropdown when clicking elsewhere
                 UserInputService.InputBegan:Connect(function(input)
                     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        local mousePos = UserInputService:GetMouseLocation()
                         if isOpen and not (
-                            mousePos.X >= DropdownMenu.AbsolutePosition.X and
-                            mousePos.X <= DropdownMenu.AbsolutePosition.X + DropdownMenu.AbsoluteSize.X and
-                            mousePos.Y >= DropdownMenu.AbsolutePosition.Y and
-                            mousePos.Y <= DropdownMenu.AbsolutePosition.Y + DropdownMenu.AbsoluteSize.Y
-                        ) and not (
-                            mousePos.X >= dropdownButtonRef.AbsolutePosition.X and
-                            mousePos.X <= dropdownButtonRef.AbsolutePosition.X + dropdownButtonRef.AbsoluteSize.X and
-                            mousePos.Y >= dropdownButtonRef.AbsolutePosition.Y and
-                            mousePos.Y <= dropdownButtonRef.AbsolutePosition.Y + dropdownButtonRef.AbsoluteSize.Y
+                            input.Position.X >= DropdownButton.AbsolutePosition.X and
+                            input.Position.X <= DropdownButton.AbsolutePosition.X + DropdownButton.AbsoluteSize.X and
+                            input.Position.Y >= DropdownButton.AbsolutePosition.Y and
+                            input.Position.Y <= DropdownButton.AbsolutePosition.Y + DropdownMenu.AbsoluteSize.Y + DropdownButton.AbsoluteSize.Y
                         ) then
                             updateDropdown()
                         end
@@ -1601,7 +1653,7 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                                 TextColor3 = item == selectedItem and ACCENT_COLOR or SECONDARY_TEXT_COLOR,
                                 TextSize = 14,
                                 Font = Enum.Font.Gotham,
-                                ZIndex = 101,
+                                ZIndex = 11,
                                 Parent = DropdownList
                             })
                             createRoundedCorner(ItemButton, 4)
