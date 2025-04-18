@@ -1451,7 +1451,6 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 local ToggleButton = createInstance("Frame", {
                     Name = "Button",
                     Size = UDim2.new(0, 40, 0, 20),
-                      {
                     Name = "Button",
                     Size = UDim2.new(0, 40, 0, 20),
                     Position = UDim2.new(1, -45, 0.5, -10),
