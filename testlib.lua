@@ -1472,7 +1472,6 @@ function UILibrary:CreateWindow(title, keySystemOptions)
                 createRoundedCorner(DropdownButton, 4)
                 createStroke(DropdownButton, Color3.fromRGB(50, 50, 50), 1, 0)
                 createStroke(DropdownButton, Color3.fromRGB(50, 50, 50), 1, 0)
-                
                 local DropdownText = createInstance("TextLabel", {
                     Name = "Text",
                     Size = UDim2.new(1, -30, 1, 0),
