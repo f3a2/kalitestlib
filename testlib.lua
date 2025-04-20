@@ -759,7 +759,7 @@ function CLANKLib:CreateWindow(title)
                     BorderSizePixel = 0,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
-
+                
                 local UICornerDropdown = CreateInstance("UICorner", {
                     Parent = DropdownButton,
                     CornerRadius = UDim.new(0, 4)
