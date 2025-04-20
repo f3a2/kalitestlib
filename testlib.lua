@@ -10,53 +10,42 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Theme Colors
+-- Constants and Theme
 local Themes = {
+    Default = {
+        BACKGROUND_COLOR = Color3.fromRGB(13, 13, 13),
+        SIDEBAR_COLOR = Color3.fromRGB(18, 18, 18),
+        ACCENT_COLOR = Color3.fromRGB(0, 255, 255),
+        TEXT_COLOR = Color3.fromRGB(255, 255, 255),
+        SECONDARY_COLOR = Color3.fromRGB(30, 30, 30),
+        TERTIARY_COLOR = Color3.fromRGB(40, 40, 40),
+        TOGGLE_OFF_COLOR = Color3.fromRGB(60, 60, 60),
+        TOGGLE_ON_COLOR = Color3.fromRGB(0, 200, 200)
+    },
     Dark = {
-        Background = Color3.fromRGB(13, 13, 13),
-        Sidebar = Color3.fromRGB(18, 18, 18),
-        Accent = Color3.fromRGB(0, 255, 255),
-        Text = Color3.fromRGB(255, 255, 255),
-        Secondary = Color3.fromRGB(30, 30, 30),
-        Tertiary = Color3.fromRGB(40, 40, 40),
-        ToggleOff = Color3.fromRGB(60, 60, 60),
-        ToggleOn = Color3.fromRGB(0, 200, 200)
+        BACKGROUND_COLOR = Color3.fromRGB(10, 10, 10),
+        SIDEBAR_COLOR = Color3.fromRGB(15, 15, 15),
+        ACCENT_COLOR = Color3.fromRGB(0, 200, 200),
+        TEXT_COLOR = Color3.fromRGB(240, 240, 240),
+        SECONDARY_COLOR = Color3.fromRGB(25, 25, 25),
+        TERTIARY_COLOR = Color3.fromRGB(35, 35, 35),
+        TOGGLE_OFF_COLOR = Color3.fromRGB(50, 50, 50),
+        TOGGLE_ON_COLOR = Color3.fromRGB(0, 180, 180)
     },
     Light = {
-        Background = Color3.fromRGB(240, 240, 240),
-        Sidebar = Color3.fromRGB(225, 225, 225),
-        Accent = Color3.fromRGB(0, 150, 150),
-        Text = Color3.fromRGB(40, 40, 40),
-        Secondary = Color3.fromRGB(210, 210, 210),
-        Tertiary = Color3.fromRGB(190, 190, 190),
-        ToggleOff = Color3.fromRGB(150, 150, 150),
-        ToggleOn = Color3.fromRGB(0, 180, 180)
-    },
-    Cyan = {
-        Background = Color3.fromRGB(10, 20, 30),
-        Sidebar = Color3.fromRGB(15, 25, 35),
-        Accent = Color3.fromRGB(0, 255, 255),
-        Text = Color3.fromRGB(255, 255, 255),
-        Secondary = Color3.fromRGB(20, 30, 40),
-        Tertiary = Color3.fromRGB(30, 40, 50),
-        ToggleOff = Color3.fromRGB(50, 60, 70),
-        ToggleOn = Color3.fromRGB(0, 220, 220)
-    },
-    Purple = {
-        Background = Color3.fromRGB(20, 10, 30),
-        Sidebar = Color3.fromRGB(30, 15, 40),
-        Accent = Color3.fromRGB(170, 0, 255),
-        Text = Color3.fromRGB(255, 255, 255),
-        Secondary = Color3.fromRGB(40, 20, 50),
-        Tertiary = Color3.fromRGB(50, 30, 60),
-        ToggleOff = Color3.fromRGB(70, 50, 80),
-        ToggleOn = Color3.fromRGB(190, 70, 255)
+        BACKGROUND_COLOR = Color3.fromRGB(240, 240, 240),
+        SIDEBAR_COLOR = Color3.fromRGB(220, 220, 220),
+        ACCENT_COLOR = Color3.fromRGB(0, 150, 150),
+        TEXT_COLOR = Color3.fromRGB(30, 30, 30),
+        SECONDARY_COLOR = Color3.fromRGB(200, 200, 200),
+        TERTIARY_COLOR = Color3.fromRGB(180, 180, 180),
+        TOGGLE_OFF_COLOR = Color3.fromRGB(150, 150, 150),
+        TOGGLE_ON_COLOR = Color3.fromRGB(0, 180, 180)
     }
 }
 
--- Current Theme
-local CurrentTheme = "Dark"
-local Colors = Themes[CurrentTheme]
+-- Current theme (default)
+local CurrentTheme = Themes.Default
 
 -- Utility Functions
 local function CreateInstance(className, properties)
@@ -112,6 +101,73 @@ local function MakeDraggable(frame, dragArea)
     end)
 end
 
+-- Apply theme to UI elements
+local function ApplyTheme(theme, ui)
+    if not ui then return end
+    
+    -- Main elements
+    if ui.MainFrame then
+        ui.MainFrame.BackgroundColor3 = theme.BACKGROUND_COLOR
+    end
+    
+    if ui.SidebarFrame then
+        ui.SidebarFrame.BackgroundColor3 = theme.SIDEBAR_COLOR
+        ui.SidebarFixer.BackgroundColor3 = theme.SIDEBAR_COLOR
+    end
+    
+    -- Text elements
+    if ui.TitleLabel then
+        ui.TitleLabel.TextColor3 = theme.TEXT_COLOR
+    end
+    
+    if ui.SubtitleLabel then
+        ui.SubtitleLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+    end
+    
+    if ui.CurrentTabLabel then
+        ui.CurrentTabLabel.TextColor3 = theme.TEXT_COLOR
+    end
+    
+    if ui.CloseButton then
+        ui.CloseButton.TextColor3 = theme.TEXT_COLOR
+    end
+    
+    -- Update all tabs and their content
+    if ui.Tabs then
+        for _, tab in pairs(ui.Tabs) do
+            -- Update tab content elements
+            if tab.Content then
+                for _, child in pairs(tab.Content:GetDescendants()) do
+                    if child:IsA("Frame") and child.Name:find("Section") then
+                        child.BackgroundColor3 = theme.SECONDARY_COLOR
+                    elseif child:IsA("TextLabel") or child:IsA("TextButton") then
+                        child.TextColor3 = theme.TEXT_COLOR
+                    elseif child:IsA("Frame") and child.Name:find("Button") then
+                        child.BackgroundColor3 = theme.TERTIARY_COLOR
+                    elseif child:IsA("Frame") and child.Name:find("Toggle") then
+                        -- Only update if it's the toggle background, not the circle
+                        if child.Name == "ToggleButton" then
+                            -- Check if toggle is on or off
+                            local isOn = child.ToggleCircle.Position.X.Scale > 0.5 or child.ToggleCircle.Position.X.Offset > 10
+                            child.BackgroundColor3 = isOn and theme.TOGGLE_ON_COLOR or theme.TOGGLE_OFF_COLOR
+                        end
+                    elseif child:IsA("Frame") and child.Name:find("Slider") then
+                        if child.Name == "SliderBackground" then
+                            child.BackgroundColor3 = theme.TERTIARY_COLOR
+                        elseif child.Name == "SliderFill" then
+                            child.BackgroundColor3 = theme.ACCENT_COLOR
+                        end
+                    elseif child:IsA("Frame") and child.Name:find("Dropdown") then
+                        if child.Name == "DropdownButton" or child.Name == "DropdownContent" then
+                            child.BackgroundColor3 = theme.TERTIARY_COLOR
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
 -- Create Main UI
 function CLANKLib:CreateWindow(title)
     -- Check if UI already exists and remove it
@@ -130,7 +186,7 @@ function CLANKLib:CreateWindow(title)
     local MainFrame = CreateInstance("Frame", {
         Name = "MainFrame",
         Parent = CLANKLibUI,
-        BackgroundColor3 = Colors.Background,
+        BackgroundColor3 = CurrentTheme.BACKGROUND_COLOR,
         BorderSizePixel = 0,
         Position = UDim2.new(0.5, -400, 0.5, -250),
         Size = UDim2.new(0, 800, 0, 500),
@@ -145,7 +201,7 @@ function CLANKLib:CreateWindow(title)
     local SidebarFrame = CreateInstance("Frame", {
         Name = "SidebarFrame",
         Parent = MainFrame,
-        BackgroundColor3 = Colors.Sidebar,
+        BackgroundColor3 = CurrentTheme.SIDEBAR_COLOR,
         BorderSizePixel = 0,
         Position = UDim2.new(0, 0, 0, 0),
         Size = UDim2.new(0, 200, 1, 0)
@@ -159,18 +215,10 @@ function CLANKLib:CreateWindow(title)
     local SidebarFixer = CreateInstance("Frame", {
         Name = "SidebarFixer",
         Parent = SidebarFrame,
-        BackgroundColor3 = Colors.Sidebar,
+        BackgroundColor3 = CurrentTheme.SIDEBAR_COLOR,
         BorderSizePixel = 0,
         Position = UDim2.new(1, -10, 0, 0),
         Size = UDim2.new(0, 10, 1, 0)
-    })
-    
-    local TopBar = CreateInstance("Frame", {
-        Name = "TopBar",
-        Parent = MainFrame,
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(1, 0, 0, 50)
     })
     
     local TitleLabel = CreateInstance("TextLabel", {
@@ -181,7 +229,7 @@ function CLANKLib:CreateWindow(title)
         Size = UDim2.new(1, -20, 0, 30),
         Font = Enum.Font.GothamBold,
         Text = title or "CLANK Scripts",
-        TextColor3 = Colors.Text,
+        TextColor3 = CurrentTheme.TEXT_COLOR,
         TextSize = 18,
         TextXAlignment = Enum.TextXAlignment.Left
     })
@@ -249,7 +297,7 @@ function CLANKLib:CreateWindow(title)
         Size = UDim2.new(1, -70, 0, 30),
         Font = Enum.Font.GothamSemibold,
         Text = LocalPlayer.Name,
-        TextColor3 = Colors.Text,
+        TextColor3 = CurrentTheme.TEXT_COLOR,
         TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left
     })
@@ -262,8 +310,8 @@ function CLANKLib:CreateWindow(title)
         Size = UDim2.new(1, -200, 1, 0)
     })
     
-    local ContentTopBar = CreateInstance("Frame", {
-        Name = "ContentTopBar",
+    local TopBar = CreateInstance("Frame", {
+        Name = "TopBar",
         Parent = ContentContainer,
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 0, 0, 0),
@@ -272,26 +320,26 @@ function CLANKLib:CreateWindow(title)
     
     local CurrentTabLabel = CreateInstance("TextLabel", {
         Name = "CurrentTabLabel",
-        Parent = ContentTopBar,
+        Parent = TopBar,
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 20, 0, 10),
         Size = UDim2.new(0, 200, 0, 30),
         Font = Enum.Font.GothamBold,
         Text = "Main",
-        TextColor3 = Colors.Text,
+        TextColor3 = CurrentTheme.TEXT_COLOR,
         TextSize = 18,
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
     local CloseButton = CreateInstance("TextButton", {
         Name = "CloseButton",
-        Parent = ContentTopBar,
+        Parent = TopBar,
         BackgroundTransparency = 1,
         Position = UDim2.new(1, -40, 0, 10),
         Size = UDim2.new(0, 30, 0, 30),
         Font = Enum.Font.GothamBold,
         Text = "+",
-        TextColor3 = Colors.Text,
+        TextColor3 = CurrentTheme.TEXT_COLOR,
         TextSize = 24,
         Rotation = 45
     })
@@ -300,9 +348,8 @@ function CLANKLib:CreateWindow(title)
         CLANKLibUI:Destroy()
     end)
     
-    -- Make only the top bar draggable
+    -- Make the entire top bar draggable (including title label)
     MakeDraggable(MainFrame, TopBar)
-    MakeDraggable(MainFrame, ContentTopBar)
     MakeDraggable(MainFrame, TitleLabel)
     
     -- Set up avatar image
@@ -314,39 +361,29 @@ function CLANKLib:CreateWindow(title)
         UserAvatar.Image = content
     end)
     
+    -- UI elements reference for theme application
+    local UIElements = {
+        MainFrame = MainFrame,
+        SidebarFrame = SidebarFrame,
+        SidebarFixer = SidebarFixer,
+        TitleLabel = TitleLabel,
+        SubtitleLabel = SubtitleLabel,
+        CurrentTabLabel = CurrentTabLabel,
+        CloseButton = CloseButton,
+        Tabs = {}
+    }
+    
     -- Library object
     local Window = {}
     Window.Tabs = {}
     Window.CurrentTab = nil
-    Window.UI = {
-        MainFrame = MainFrame,
-        SidebarFrame = SidebarFrame,
-        ContentContainer = ContentContainer,
-        TitleLabel = TitleLabel,
-        SubtitleLabel = SubtitleLabel,
-        CurrentTabLabel = CurrentTabLabel,
-        UserNameLabel = UserNameLabel
-    }
+    Window.UIElements = UIElements
     
-    -- Function to apply theme
-    function Window:ApplyTheme(themeName)
-        if not Themes[themeName] then return end
-        
-        CurrentTheme = themeName
-        Colors = Themes[themeName]
-        
-        -- Update UI colors
-        MainFrame.BackgroundColor3 = Colors.Background
-        SidebarFrame.BackgroundColor3 = Colors.Sidebar
-        SidebarFixer.BackgroundColor3 = Colors.Sidebar
-        TitleLabel.TextColor3 = Colors.Text
-        UserNameLabel.TextColor3 = Colors.Text
-        CurrentTabLabel.TextColor3 = Colors.Text
-        CloseButton.TextColor3 = Colors.Text
-        
-        -- Update all tabs and their content
-        for _, tab in pairs(Window.Tabs) do
-            tab:UpdateTheme()
+    -- Function to set theme
+    function Window:SetTheme(themeName)
+        if Themes[themeName] then
+            CurrentTheme = Themes[themeName]
+            ApplyTheme(CurrentTheme, self.UIElements)
         end
     end
     
@@ -360,7 +397,7 @@ function CLANKLib:CreateWindow(title)
             Size = UDim2.new(0.9, 0, 0, 36),
             Font = Enum.Font.Gotham,
             Text = "",
-            TextColor3 = Colors.Text,
+            TextColor3 = CurrentTheme.TEXT_COLOR,
             TextSize = 14,
             AutoButtonColor = false
         })
@@ -372,7 +409,7 @@ function CLANKLib:CreateWindow(title)
             Position = UDim2.new(0, 15, 0.5, -8),
             Size = UDim2.new(0, 16, 0, 16),
             Image = icon or "rbxassetid://7733715400", -- Default icon
-            ImageColor3 = Colors.Text
+            ImageColor3 = CurrentTheme.TEXT_COLOR
         })
         
         local TabLabel = CreateInstance("TextLabel", {
@@ -383,7 +420,7 @@ function CLANKLib:CreateWindow(title)
             Size = UDim2.new(1, -50, 1, 0),
             Font = Enum.Font.Gotham,
             Text = tabName,
-            TextColor3 = Colors.Text,
+            TextColor3 = CurrentTheme.TEXT_COLOR,
             TextSize = 14,
             TextXAlignment = Enum.TextXAlignment.Left
         })
@@ -403,7 +440,7 @@ function CLANKLib:CreateWindow(title)
             BottomImage = "rbxassetid://6889812791",
             MidImage = "rbxassetid://6889812721",
             TopImage = "rbxassetid://6889812642",
-            ScrollBarImageColor3 = Colors.Accent
+            ScrollBarImageColor3 = CurrentTheme.ACCENT_COLOR
         })
         
         local ContentPadding = CreateInstance("UIPadding", {
@@ -425,7 +462,6 @@ function CLANKLib:CreateWindow(title)
         local Tab = {}
         Tab.Name = tabName
         Tab.Content = TabContent
-        Tab.Sections = {}
         
         -- Function to select this tab
         function Tab:Select()
@@ -439,18 +475,6 @@ function CLANKLib:CreateWindow(title)
             Window.CurrentTab = Tab
         end
         
-        -- Function to update theme for this tab
-        function Tab:UpdateTheme()
-            TabLabel.TextColor3 = Colors.Text
-            TabIcon.ImageColor3 = Colors.Text
-            TabContent.ScrollBarImageColor3 = Colors.Accent
-            
-            -- Update all sections
-            for _, section in pairs(Tab.Sections) do
-                section:UpdateTheme()
-            end
-        end
-        
         -- Tab button click handler
         TabButton.MouseButton1Click:Connect(function()
             Tab:Select()
@@ -461,7 +485,7 @@ function CLANKLib:CreateWindow(title)
             local SectionFrame = CreateInstance("Frame", {
                 Name = sectionName .. "Section",
                 Parent = TabContent,
-                BackgroundColor3 = Colors.Secondary,
+                BackgroundColor3 = CurrentTheme.SECONDARY_COLOR,
                 BorderSizePixel = 0,
                 Size = UDim2.new(1, 0, 0, 36),
                 AutomaticSize = Enum.AutomaticSize.Y
@@ -480,7 +504,7 @@ function CLANKLib:CreateWindow(title)
                 Size = UDim2.new(1, -20, 0, 36),
                 Font = Enum.Font.GothamSemibold,
                 Text = sectionName,
-                TextColor3 = Colors.Text,
+                TextColor3 = CurrentTheme.TEXT_COLOR,
                 TextSize = 14,
                 TextXAlignment = Enum.TextXAlignment.Left
             })
@@ -509,23 +533,6 @@ function CLANKLib:CreateWindow(title)
             
             -- Section object
             local Section = {}
-            Section.Frame = SectionFrame
-            Section.Label = SectionLabel
-            Section.Content = SectionContent
-            Section.Elements = {}
-            
-            -- Function to update theme for this section
-            function Section:UpdateTheme()
-                SectionFrame.BackgroundColor3 = Colors.Secondary
-                SectionLabel.TextColor3 = Colors.Text
-                
-                -- Update all elements
-                for _, element in pairs(Section.Elements) do
-                    if element.UpdateTheme then
-                        element:UpdateTheme()
-                    end
-                end
-            end
             
             -- Toggle creator function
             function Section:CreateToggle(toggleName, defaultState, callback)
@@ -544,7 +551,7 @@ function CLANKLib:CreateWindow(title)
                     Size = UDim2.new(1, -50, 1, 0),
                     Font = Enum.Font.Gotham,
                     Text = toggleName,
-                    TextColor3 = Colors.Text,
+                    TextColor3 = CurrentTheme.TEXT_COLOR,
                     TextSize = 14,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
@@ -552,7 +559,7 @@ function CLANKLib:CreateWindow(title)
                 local ToggleButton = CreateInstance("Frame", {
                     Name = "ToggleButton",
                     Parent = ToggleFrame,
-                    BackgroundColor3 = defaultState and Colors.ToggleOn or Colors.ToggleOff,
+                    BackgroundColor3 = defaultState and CurrentTheme.TOGGLE_ON_COLOR or CurrentTheme.TOGGLE_OFF_COLOR,
                     Position = UDim2.new(1, -40, 0.5, -10),
                     Size = UDim2.new(0, 40, 0, 20),
                     BorderSizePixel = 0
@@ -584,10 +591,10 @@ function CLANKLib:CreateWindow(title)
                     Toggled = not Toggled
                     
                     if Toggled then
-                        Tween(ToggleButton, {BackgroundColor3 = Colors.ToggleOn}, 0.2)
+                        Tween(ToggleButton, {BackgroundColor3 = CurrentTheme.TOGGLE_ON_COLOR}, 0.2)
                         Tween(ToggleCircle, {Position = UDim2.new(1, -18, 0.5, -8)}, 0.2)
                     else
-                        Tween(ToggleButton, {BackgroundColor3 = Colors.ToggleOff}, 0.2)
+                        Tween(ToggleButton, {BackgroundColor3 = CurrentTheme.TOGGLE_OFF_COLOR}, 0.2)
                         Tween(ToggleCircle, {Position = UDim2.new(0, 2, 0.5, -8)}, 0.2)
                     end
                     
@@ -605,15 +612,6 @@ function CLANKLib:CreateWindow(title)
                 
                 -- Toggle object
                 local Toggle = {}
-                Toggle.Frame = ToggleFrame
-                Toggle.Button = ToggleButton
-                Toggle.Circle = ToggleCircle
-                Toggle.Label = ToggleLabel
-                
-                function Toggle:UpdateTheme()
-                    ToggleLabel.TextColor3 = Colors.Text
-                    ToggleButton.BackgroundColor3 = Toggled and Colors.ToggleOn or Colors.ToggleOff
-                end
                 
                 function Toggle:Set(state)
                     if state ~= Toggled then
@@ -625,7 +623,6 @@ function CLANKLib:CreateWindow(title)
                     return Toggled
                 end
                 
-                table.insert(Section.Elements, Toggle)
                 return Toggle
             end
             
@@ -646,7 +643,7 @@ function CLANKLib:CreateWindow(title)
                     Size = UDim2.new(1, -50, 0, 20),
                     Font = Enum.Font.Gotham,
                     Text = sliderName,
-                    TextColor3 = Colors.Text,
+                    TextColor3 = CurrentTheme.TEXT_COLOR,
                     TextSize = 14,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
@@ -659,7 +656,7 @@ function CLANKLib:CreateWindow(title)
                     Size = UDim2.new(0, 40, 0, 20),
                     Font = Enum.Font.Gotham,
                     Text = tostring(defaultValue),
-                    TextColor3 = Colors.Text,
+                    TextColor3 = CurrentTheme.TEXT_COLOR,
                     TextSize = 14,
                     TextXAlignment = Enum.TextXAlignment.Right
                 })
@@ -667,7 +664,7 @@ function CLANKLib:CreateWindow(title)
                 local SliderBackground = CreateInstance("Frame", {
                     Name = "SliderBackground",
                     Parent = SliderFrame,
-                    BackgroundColor3 = Colors.Tertiary,
+                    BackgroundColor3 = CurrentTheme.TERTIARY_COLOR,
                     BorderSizePixel = 0,
                     Position = UDim2.new(0, 0, 0, 25),
                     Size = UDim2.new(1, 0, 0, 6)
@@ -681,7 +678,7 @@ function CLANKLib:CreateWindow(title)
                 local SliderFill = CreateInstance("Frame", {
                     Name = "SliderFill",
                     Parent = SliderBackground,
-                    BackgroundColor3 = Colors.Accent,
+                    BackgroundColor3 = CurrentTheme.ACCENT_COLOR,
                     BorderSizePixel = 0,
                     Size = UDim2.new((defaultValue - min) / (max - min), 0, 1, 0)
                 })
@@ -760,19 +757,6 @@ function CLANKLib:CreateWindow(title)
                 
                 -- Slider object
                 local Slider = {}
-                Slider.Frame = SliderFrame
-                Slider.Background = SliderBackground
-                Slider.Fill = SliderFill
-                Slider.Button = SliderButton
-                Slider.Label = SliderLabel
-                Slider.ValueLabel = ValueLabel
-                
-                function Slider:UpdateTheme()
-                    SliderLabel.TextColor3 = Colors.Text
-                    ValueLabel.TextColor3 = Colors.Text
-                    SliderBackground.BackgroundColor3 = Colors.Tertiary
-                    SliderFill.BackgroundColor3 = Colors.Accent
-                end
                 
                 function Slider:Set(value)
                     value = math.clamp(value, min, max)
@@ -792,7 +776,6 @@ function CLANKLib:CreateWindow(title)
                     return Value
                 end
                 
-                table.insert(Section.Elements, Slider)
                 return Slider
             end
             
@@ -808,11 +791,11 @@ function CLANKLib:CreateWindow(title)
                 local Button = CreateInstance("TextButton", {
                     Name = "Button",
                     Parent = ButtonFrame,
-                    BackgroundColor3 = Colors.Tertiary,
+                    BackgroundColor3 = CurrentTheme.TERTIARY_COLOR,
                     Size = UDim2.new(1, 0, 1, 0),
                     Font = Enum.Font.Gotham,
                     Text = buttonName,
-                    TextColor3 = Colors.Text,
+                    TextColor3 = CurrentTheme.TEXT_COLOR,
                     TextSize = 14,
                     BorderSizePixel = 0,
                     AutoButtonColor = false
@@ -829,7 +812,7 @@ function CLANKLib:CreateWindow(title)
                 end)
                 
                 Button.MouseLeave:Connect(function()
-                    Tween(Button, {BackgroundColor3 = Colors.Tertiary}, 0.2)
+                    Tween(Button, {BackgroundColor3 = CurrentTheme.TERTIARY_COLOR}, 0.2)
                 end)
                 
                 Button.MouseButton1Down:Connect(function()
@@ -845,19 +828,11 @@ function CLANKLib:CreateWindow(title)
                 
                 -- Button object
                 local ButtonObj = {}
-                ButtonObj.Frame = ButtonFrame
-                ButtonObj.Button = Button
-                
-                function ButtonObj:UpdateTheme()
-                    Button.BackgroundColor3 = Colors.Tertiary
-                    Button.TextColor3 = Colors.Text
-                end
                 
                 function ButtonObj:SetText(text)
                     Button.Text = text
                 end
                 
-                table.insert(Section.Elements, ButtonObj)
                 return ButtonObj
             end
             
@@ -867,7 +842,7 @@ function CLANKLib:CreateWindow(title)
                     Name = dropdownName .. "Dropdown",
                     Parent = SectionContent,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 60),
+                    Size = UDim2.new(1, 0, 0, 30),
                     ClipsDescendants = true
                 })
                 
@@ -879,7 +854,7 @@ function CLANKLib:CreateWindow(title)
                     Size = UDim2.new(1, 0, 0, 20),
                     Font = Enum.Font.Gotham,
                     Text = dropdownName,
-                    TextColor3 = Colors.Text,
+                    TextColor3 = CurrentTheme.TEXT_COLOR,
                     TextSize = 14,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
@@ -887,12 +862,12 @@ function CLANKLib:CreateWindow(title)
                 local DropdownButton = CreateInstance("TextButton", {
                     Name = "DropdownButton",
                     Parent = DropdownFrame,
-                    BackgroundColor3 = Colors.Tertiary,
+                    BackgroundColor3 = CurrentTheme.TERTIARY_COLOR,
                     Position = UDim2.new(0, 0, 0, 25),
                     Size = UDim2.new(1, 0, 0, 30),
                     Font = Enum.Font.Gotham,
                     Text = "  " .. (defaultOption or "Select..."),
-                    TextColor3 = Colors.Text,
+                    TextColor3 = CurrentTheme.TEXT_COLOR,
                     TextSize = 14,
                     BorderSizePixel = 0,
                     TextXAlignment = Enum.TextXAlignment.Left
@@ -910,13 +885,13 @@ function CLANKLib:CreateWindow(title)
                     Position = UDim2.new(1, -25, 0.5, -8),
                     Size = UDim2.new(0, 16, 0, 16),
                     Image = "rbxassetid://7072706663", -- Down arrow icon
-                    ImageColor3 = Colors.Text
+                    ImageColor3 = CurrentTheme.TEXT_COLOR
                 })
                 
                 local DropdownContent = CreateInstance("Frame", {
                     Name = "DropdownContent",
                     Parent = DropdownFrame,
-                    BackgroundColor3 = Colors.Tertiary,
+                    BackgroundColor3 = CurrentTheme.TERTIARY_COLOR,
                     Position = UDim2.new(0, 0, 0, 60),
                     Size = UDim2.new(1, 0, 0, 0),
                     Visible = false,
@@ -961,7 +936,7 @@ function CLANKLib:CreateWindow(title)
                         Size = UDim2.new(1, 0, 0, 25),
                         Font = Enum.Font.Gotham,
                         Text = "  " .. option,
-                        TextColor3 = Colors.Text,
+                        TextColor3 = CurrentTheme.TEXT_COLOR,
                         TextSize = 14,
                         TextXAlignment = Enum.TextXAlignment.Left,
                         ZIndex = 6
@@ -992,24 +967,6 @@ function CLANKLib:CreateWindow(title)
                 
                 -- Dropdown object
                 local Dropdown = {}
-                Dropdown.Frame = DropdownFrame
-                Dropdown.Button = DropdownButton
-                Dropdown.Content = DropdownContent
-                Dropdown.Label = DropdownLabel
-                
-                function Dropdown:UpdateTheme()
-                    DropdownLabel.TextColor3 = Colors.Text
-                    DropdownButton.BackgroundColor3 = Colors.Tertiary
-                    DropdownButton.TextColor3 = Colors.Text
-                    DropdownIcon.ImageColor3 = Colors.Text
-                    DropdownContent.BackgroundColor3 = Colors.Tertiary
-                    
-                    for _, child in pairs(DropdownContent:GetChildren()) do
-                        if child:IsA("TextButton") then
-                            child.TextColor3 = Colors.Text
-                        end
-                    end
-                end
                 
                 function Dropdown:Select(option)
                     if table.find(options, option) then
@@ -1026,16 +983,15 @@ function CLANKLib:CreateWindow(title)
                     return Selected
                 end
                 
-                table.insert(Section.Elements, Dropdown)
                 return Dropdown
             end
             
-            table.insert(Tab.Sections, Section)
             return Section
         end
         
         -- Add tab to window
         table.insert(Window.Tabs, Tab)
+        table.insert(Window.UIElements.Tabs, Tab)
         
         -- Select the first tab by default
         if #Window.Tabs == 1 then
