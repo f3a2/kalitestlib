@@ -1,6 +1,6 @@
 --[[
     CLANK UI Library
-    A sleek, dark-themed UI library for Roblox scripts
+    A sleek, dark-themed UI library for Roblox scripts with enhanced visuals
 ]]
 
 local CLANKLib = {}
@@ -17,10 +17,11 @@ local Themes = {
         Sidebar = Color3.fromRGB(18, 18, 18),
         Accent = Color3.fromRGB(0, 255, 255),
         Text = Color3.fromRGB(255, 255, 255),
-        Secondary = Color3.fromRGB(30, 30, 30),
-        Tertiary = Color3.fromRGB(40, 40, 40),
-        ToggleOff = Color3.fromRGB(60, 60, 60),
-        ToggleOn = Color3.fromRGB(0, 200, 200)
+        Secondary = Color3.fromRGB(25, 25, 25),
+        Tertiary = Color3.fromRGB(30, 30, 30),
+        ToggleOff = Color3.fromRGB(40, 40, 40),
+        ToggleOn = Color3.fromRGB(0, 200, 200),
+        SectionBackground = Color3.fromRGB(20, 20, 20)
     },
     Light = {
         Background = Color3.fromRGB(240, 240, 240),
@@ -30,7 +31,8 @@ local Themes = {
         Secondary = Color3.fromRGB(210, 210, 210),
         Tertiary = Color3.fromRGB(190, 190, 190),
         ToggleOff = Color3.fromRGB(150, 150, 150),
-        ToggleOn = Color3.fromRGB(0, 180, 180)
+        ToggleOn = Color3.fromRGB(0, 180, 180),
+        SectionBackground = Color3.fromRGB(220, 220, 220)
     },
     Cyan = {
         Background = Color3.fromRGB(10, 20, 30),
@@ -39,8 +41,9 @@ local Themes = {
         Text = Color3.fromRGB(255, 255, 255),
         Secondary = Color3.fromRGB(20, 30, 40),
         Tertiary = Color3.fromRGB(30, 40, 50),
-        ToggleOff = Color3.fromRGB(50, 60, 70),
-        ToggleOn = Color3.fromRGB(0, 220, 220)
+        ToggleOff = Color3.fromRGB(40, 50, 60),
+        ToggleOn = Color3.fromRGB(0, 220, 220),
+        SectionBackground = Color3.fromRGB(18, 28, 38)
     },
     Purple = {
         Background = Color3.fromRGB(20, 10, 30),
@@ -49,8 +52,9 @@ local Themes = {
         Text = Color3.fromRGB(255, 255, 255),
         Secondary = Color3.fromRGB(40, 20, 50),
         Tertiary = Color3.fromRGB(50, 30, 60),
-        ToggleOff = Color3.fromRGB(70, 50, 80),
-        ToggleOn = Color3.fromRGB(190, 70, 255)
+        ToggleOff = Color3.fromRGB(60, 40, 70),
+        ToggleOn = Color3.fromRGB(190, 70, 255),
+        SectionBackground = Color3.fromRGB(35, 18, 45)
     }
 }
 
@@ -112,6 +116,36 @@ local function MakeDraggable(frame, dragArea)
     end)
 end
 
+-- Create Shadow Effect
+local function CreateShadow(parent, size, transparency)
+    local shadow = CreateInstance("ImageLabel", {
+        Name = "Shadow",
+        Parent = parent,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(1, size or 15, 1, size or 15),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Image = "rbxassetid://5554236805",
+        ImageColor3 = Color3.fromRGB(0, 0, 0),
+        ImageTransparency = transparency or 0.6,
+        ScaleType = Enum.ScaleType.Slice,
+        SliceCenter = Rect.new(23, 23, 277, 277),
+        ZIndex = parent.ZIndex - 1
+    })
+    return shadow
+end
+
+-- Get User Display Name and Username
+local function GetUserInfo()
+    local displayName = LocalPlayer.DisplayName or LocalPlayer.Name
+    local userName = "@" .. LocalPlayer.Name
+    
+    return {
+        DisplayName = displayName,
+        UserName = userName
+    }
+end
+
 -- Create Main UI
 function CLANKLib:CreateWindow(title)
     -- Check if UI already exists and remove it
@@ -134,8 +168,11 @@ function CLANKLib:CreateWindow(title)
         BorderSizePixel = 0,
         Position = UDim2.new(0.5, -400, 0.5, -250),
         Size = UDim2.new(0, 800, 0, 500),
-        ClipsDescendants = true
+        ClipsDescendants = true,
+        ZIndex = 10
     })
+    
+    local MainShadow = CreateShadow(MainFrame, 30, 0.5)
     
     local UICorner = CreateInstance("UICorner", {
         Parent = MainFrame,
@@ -148,7 +185,8 @@ function CLANKLib:CreateWindow(title)
         BackgroundColor3 = Colors.Sidebar,
         BorderSizePixel = 0,
         Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(0, 200, 1, 0)
+        Size = UDim2.new(0, 200, 1, 0),
+        ZIndex = 11
     })
     
     local UICornerSidebar = CreateInstance("UICorner", {
@@ -162,7 +200,8 @@ function CLANKLib:CreateWindow(title)
         BackgroundColor3 = Colors.Sidebar,
         BorderSizePixel = 0,
         Position = UDim2.new(1, -10, 0, 0),
-        Size = UDim2.new(0, 10, 1, 0)
+        Size = UDim2.new(0, 10, 1, 0),
+        ZIndex = 11
     })
     
     local TopBar = CreateInstance("Frame", {
@@ -170,7 +209,8 @@ function CLANKLib:CreateWindow(title)
         Parent = MainFrame,
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(1, 0, 0, 50)
+        Size = UDim2.new(1, 0, 0, 50),
+        ZIndex = 12
     })
     
     local TitleLabel = CreateInstance("TextLabel", {
@@ -183,7 +223,8 @@ function CLANKLib:CreateWindow(title)
         Text = title or "CLANK Scripts",
         TextColor3 = Colors.Text,
         TextSize = 18,
-        TextXAlignment = Enum.TextXAlignment.Left
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 12
     })
     
     local SubtitleLabel = CreateInstance("TextLabel", {
@@ -196,7 +237,8 @@ function CLANKLib:CreateWindow(title)
         Text = "Create & Execute",
         TextColor3 = Color3.fromRGB(150, 150, 150),
         TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 12
     })
     
     local TabsContainer = CreateInstance("ScrollingFrame", {
@@ -208,7 +250,8 @@ function CLANKLib:CreateWindow(title)
         CanvasSize = UDim2.new(0, 0, 0, 0),
         ScrollBarThickness = 0,
         ScrollingDirection = Enum.ScrollingDirection.Y,
-        AutomaticCanvasSize = Enum.AutomaticSize.Y
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+        ZIndex = 12
     })
     
     local TabsLayout = CreateInstance("UIListLayout", {
@@ -218,13 +261,17 @@ function CLANKLib:CreateWindow(title)
         HorizontalAlignment = Enum.HorizontalAlignment.Center
     })
     
+    -- Get user info
+    local userInfo = GetUserInfo()
+    
     local UserInfoFrame = CreateInstance("Frame", {
         Name = "UserInfoFrame",
         Parent = SidebarFrame,
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 0, 1, -60),
         Size = UDim2.new(1, 0, 0, 60),
-        BorderSizePixel = 0
+        BorderSizePixel = 0,
+        ZIndex = 12
     })
     
     local UserAvatar = CreateInstance("ImageLabel", {
@@ -233,7 +280,8 @@ function CLANKLib:CreateWindow(title)
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 15, 0.5, -15),
         Size = UDim2.new(0, 30, 0, 30),
-        Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+        Image = "rbxasset://textures/ui/GuiImagePlaceholder.png",
+        ZIndex = 12
     })
     
     local UICornerAvatar = CreateInstance("UICorner", {
@@ -241,17 +289,41 @@ function CLANKLib:CreateWindow(title)
         CornerRadius = UDim.new(1, 0)
     })
     
-    local UserNameLabel = CreateInstance("TextLabel", {
-        Name = "UserNameLabel",
+    local UserNameFrame = CreateInstance("Frame", {
+        Name = "UserNameFrame",
         Parent = UserInfoFrame,
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 55, 0.5, -15),
         Size = UDim2.new(1, -70, 0, 30),
+        ZIndex = 12
+    })
+    
+    local DisplayNameLabel = CreateInstance("TextLabel", {
+        Name = "DisplayNameLabel",
+        Parent = UserNameFrame,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(1, 0, 0.5, 0),
         Font = Enum.Font.GothamSemibold,
-        Text = LocalPlayer.Name,
+        Text = userInfo.DisplayName,
         TextColor3 = Colors.Text,
         TextSize = 14,
-        TextXAlignment = Enum.TextXAlignment.Left
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 12
+    })
+    
+    local UserNameLabel = CreateInstance("TextLabel", {
+        Name = "UserNameLabel",
+        Parent = UserNameFrame,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 0, 0.5, 0),
+        Size = UDim2.new(1, 0, 0.5, 0),
+        Font = Enum.Font.Gotham,
+        Text = userInfo.UserName,
+        TextColor3 = Color3.fromRGB(150, 150, 150),
+        TextSize = 12,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 12
     })
     
     local ContentContainer = CreateInstance("Frame", {
@@ -259,7 +331,8 @@ function CLANKLib:CreateWindow(title)
         Parent = MainFrame,
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 200, 0, 0),
-        Size = UDim2.new(1, -200, 1, 0)
+        Size = UDim2.new(1, -200, 1, 0),
+        ZIndex = 11
     })
     
     local ContentTopBar = CreateInstance("Frame", {
@@ -267,7 +340,8 @@ function CLANKLib:CreateWindow(title)
         Parent = ContentContainer,
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(1, 0, 0, 50)
+        Size = UDim2.new(1, 0, 0, 50),
+        ZIndex = 12
     })
     
     local CurrentTabLabel = CreateInstance("TextLabel", {
@@ -280,7 +354,8 @@ function CLANKLib:CreateWindow(title)
         Text = "Main",
         TextColor3 = Colors.Text,
         TextSize = 18,
-        TextXAlignment = Enum.TextXAlignment.Left
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 12
     })
     
     local CloseButton = CreateInstance("TextButton", {
@@ -290,10 +365,10 @@ function CLANKLib:CreateWindow(title)
         Position = UDim2.new(1, -40, 0, 10),
         Size = UDim2.new(0, 30, 0, 30),
         Font = Enum.Font.GothamBold,
-        Text = "+",
+        Text = "×",
         TextColor3 = Colors.Text,
         TextSize = 24,
-        Rotation = 45
+        ZIndex = 12
     })
     
     CloseButton.MouseButton1Click:Connect(function()
@@ -325,6 +400,7 @@ function CLANKLib:CreateWindow(title)
         TitleLabel = TitleLabel,
         SubtitleLabel = SubtitleLabel,
         CurrentTabLabel = CurrentTabLabel,
+        DisplayNameLabel = DisplayNameLabel,
         UserNameLabel = UserNameLabel
     }
     
@@ -340,7 +416,7 @@ function CLANKLib:CreateWindow(title)
         SidebarFrame.BackgroundColor3 = Colors.Sidebar
         SidebarFixer.BackgroundColor3 = Colors.Sidebar
         TitleLabel.TextColor3 = Colors.Text
-        UserNameLabel.TextColor3 = Colors.Text
+        DisplayNameLabel.TextColor3 = Colors.Text
         CurrentTabLabel.TextColor3 = Colors.Text
         CloseButton.TextColor3 = Colors.Text
         
@@ -362,7 +438,8 @@ function CLANKLib:CreateWindow(title)
             Text = "",
             TextColor3 = Colors.Text,
             TextSize = 14,
-            AutoButtonColor = false
+            AutoButtonColor = false,
+            ZIndex = 13
         })
         
         local TabIcon = CreateInstance("ImageLabel", {
@@ -372,7 +449,8 @@ function CLANKLib:CreateWindow(title)
             Position = UDim2.new(0, 15, 0.5, -8),
             Size = UDim2.new(0, 16, 0, 16),
             Image = icon or "rbxassetid://7733715400", -- Default icon
-            ImageColor3 = Colors.Text
+            ImageColor3 = Colors.Text,
+            ZIndex = 13
         })
         
         local TabLabel = CreateInstance("TextLabel", {
@@ -385,7 +463,8 @@ function CLANKLib:CreateWindow(title)
             Text = tabName,
             TextColor3 = Colors.Text,
             TextSize = 14,
-            TextXAlignment = Enum.TextXAlignment.Left
+            TextXAlignment = Enum.TextXAlignment.Left,
+            ZIndex = 13
         })
         
         -- Create tab content
@@ -403,7 +482,8 @@ function CLANKLib:CreateWindow(title)
             BottomImage = "rbxassetid://6889812791",
             MidImage = "rbxassetid://6889812721",
             TopImage = "rbxassetid://6889812642",
-            ScrollBarImageColor3 = Colors.Accent
+            ScrollBarImageColor3 = Colors.Accent,
+            ZIndex = 12
         })
         
         local ContentPadding = CreateInstance("UIPadding", {
@@ -461,11 +541,15 @@ function CLANKLib:CreateWindow(title)
             local SectionFrame = CreateInstance("Frame", {
                 Name = sectionName .. "Section",
                 Parent = TabContent,
-                BackgroundColor3 = Colors.Secondary,
+                BackgroundColor3 = Colors.SectionBackground,
                 BorderSizePixel = 0,
                 Size = UDim2.new(1, 0, 0, 36),
-                AutomaticSize = Enum.AutomaticSize.Y
+                AutomaticSize = Enum.AutomaticSize.Y,
+                ZIndex = 13
             })
+            
+            local SectionShadow = CreateShadow(SectionFrame, 15, 0.7)
+            SectionShadow.ZIndex = 12
             
             local UICornerSection = CreateInstance("UICorner", {
                 Parent = SectionFrame,
@@ -482,7 +566,8 @@ function CLANKLib:CreateWindow(title)
                 Text = sectionName,
                 TextColor3 = Colors.Text,
                 TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Left
+                TextXAlignment = Enum.TextXAlignment.Left,
+                ZIndex = 14
             })
             
             local SectionContent = CreateInstance("Frame", {
@@ -491,7 +576,8 @@ function CLANKLib:CreateWindow(title)
                 BackgroundTransparency = 1,
                 Position = UDim2.new(0, 0, 0, 36),
                 Size = UDim2.new(1, 0, 0, 0),
-                AutomaticSize = Enum.AutomaticSize.Y
+                AutomaticSize = Enum.AutomaticSize.Y,
+                ZIndex = 14
             })
             
             local SectionPadding = CreateInstance("UIPadding", {
@@ -516,7 +602,7 @@ function CLANKLib:CreateWindow(title)
             
             -- Function to update theme for this section
             function Section:UpdateTheme()
-                SectionFrame.BackgroundColor3 = Colors.Secondary
+                SectionFrame.BackgroundColor3 = Colors.SectionBackground
                 SectionLabel.TextColor3 = Colors.Text
                 
                 -- Update all elements
@@ -533,7 +619,8 @@ function CLANKLib:CreateWindow(title)
                     Name = toggleName .. "Toggle",
                     Parent = SectionContent,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 30)
+                    Size = UDim2.new(1, 0, 0, 30),
+                    ZIndex = 15
                 })
                 
                 local ToggleLabel = CreateInstance("TextLabel", {
@@ -546,30 +633,36 @@ function CLANKLib:CreateWindow(title)
                     Text = toggleName,
                     TextColor3 = Colors.Text,
                     TextSize = 14,
-                    TextXAlignment = Enum.TextXAlignment.Left
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    ZIndex = 15
                 })
                 
-                local ToggleButton = CreateInstance("Frame", {
-                    Name = "ToggleButton",
+                local ToggleBackground = CreateInstance("Frame", {
+                    Name = "ToggleBackground",
                     Parent = ToggleFrame,
                     BackgroundColor3 = defaultState and Colors.ToggleOn or Colors.ToggleOff,
                     Position = UDim2.new(1, -40, 0.5, -10),
                     Size = UDim2.new(0, 40, 0, 20),
-                    BorderSizePixel = 0
+                    BorderSizePixel = 0,
+                    ZIndex = 15
                 })
                 
+                local ToggleShadow = CreateShadow(ToggleBackground, 10, 0.7)
+                ToggleShadow.ZIndex = 14
+                
                 local UICornerToggle = CreateInstance("UICorner", {
-                    Parent = ToggleButton,
+                    Parent = ToggleBackground,
                     CornerRadius = UDim.new(1, 0)
                 })
                 
                 local ToggleCircle = CreateInstance("Frame", {
                     Name = "ToggleCircle",
-                    Parent = ToggleButton,
+                    Parent = ToggleBackground,
                     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
                     Position = defaultState and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
                     Size = UDim2.new(0, 16, 0, 16),
-                    BorderSizePixel = 0
+                    BorderSizePixel = 0,
+                    ZIndex = 16
                 })
                 
                 local UICornerCircle = CreateInstance("UICorner", {
@@ -584,10 +677,10 @@ function CLANKLib:CreateWindow(title)
                     Toggled = not Toggled
                     
                     if Toggled then
-                        Tween(ToggleButton, {BackgroundColor3 = Colors.ToggleOn}, 0.2)
+                        Tween(ToggleBackground, {BackgroundColor3 = Colors.ToggleOn}, 0.2)
                         Tween(ToggleCircle, {Position = UDim2.new(1, -18, 0.5, -8)}, 0.2)
                     else
-                        Tween(ToggleButton, {BackgroundColor3 = Colors.ToggleOff}, 0.2)
+                        Tween(ToggleBackground, {BackgroundColor3 = Colors.ToggleOff}, 0.2)
                         Tween(ToggleCircle, {Position = UDim2.new(0, 2, 0.5, -8)}, 0.2)
                     end
                     
@@ -606,13 +699,13 @@ function CLANKLib:CreateWindow(title)
                 -- Toggle object
                 local Toggle = {}
                 Toggle.Frame = ToggleFrame
-                Toggle.Button = ToggleButton
+                Toggle.Background = ToggleBackground
                 Toggle.Circle = ToggleCircle
                 Toggle.Label = ToggleLabel
                 
                 function Toggle:UpdateTheme()
                     ToggleLabel.TextColor3 = Colors.Text
-                    ToggleButton.BackgroundColor3 = Toggled and Colors.ToggleOn or Colors.ToggleOff
+                    ToggleBackground.BackgroundColor3 = Toggled and Colors.ToggleOn or Colors.ToggleOff
                 end
                 
                 function Toggle:Set(state)
@@ -635,10 +728,13 @@ function CLANKLib:CreateWindow(title)
                     Name = sliderName .. "Slider",
                     Parent = SectionContent,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 50)
+                    Size = UDim2.new(1, 0, 0, 50),
+                    ZIndex = 15
                 })
                 
                 local SliderLabel = CreateInstance("TextLabel", {
+                    Name = "SliderLabel",
+                    Parent = Slider  {
                     Name = "SliderLabel",
                     Parent = SliderFrame,
                     BackgroundTransparency = 1,
@@ -648,7 +744,8 @@ function CLANKLib:CreateWindow(title)
                     Text = sliderName,
                     TextColor3 = Colors.Text,
                     TextSize = 14,
-                    TextXAlignment = Enum.TextXAlignment.Left
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    ZIndex = 15
                 })
                 
                 local ValueLabel = CreateInstance("TextLabel", {
@@ -661,7 +758,8 @@ function CLANKLib:CreateWindow(title)
                     Text = tostring(defaultValue),
                     TextColor3 = Colors.Text,
                     TextSize = 14,
-                    TextXAlignment = Enum.TextXAlignment.Right
+                    TextXAlignment = Enum.TextXAlignment.Right,
+                    ZIndex = 15
                 })
                 
                 local SliderBackground = CreateInstance("Frame", {
@@ -670,8 +768,12 @@ function CLANKLib:CreateWindow(title)
                     BackgroundColor3 = Colors.Tertiary,
                     BorderSizePixel = 0,
                     Position = UDim2.new(0, 0, 0, 25),
-                    Size = UDim2.new(1, 0, 0, 6)
+                    Size = UDim2.new(1, 0, 0, 6),
+                    ZIndex = 15
                 })
+                
+                local SliderShadow = CreateShadow(SliderBackground, 10, 0.7)
+                SliderShadow.ZIndex = 14
                 
                 local UICornerSliderBg = CreateInstance("UICorner", {
                     Parent = SliderBackground,
@@ -683,7 +785,8 @@ function CLANKLib:CreateWindow(title)
                     Parent = SliderBackground,
                     BackgroundColor3 = Colors.Accent,
                     BorderSizePixel = 0,
-                    Size = UDim2.new((defaultValue - min) / (max - min), 0, 1, 0)
+                    Size = UDim2.new((defaultValue - min) / (max - min), 0, 1, 0),
+                    ZIndex = 16
                 })
                 
                 local UICornerSliderFill = CreateInstance("UICorner", {
@@ -698,7 +801,8 @@ function CLANKLib:CreateWindow(title)
                     Position = UDim2.new((defaultValue - min) / (max - min), -6, 0.5, -6),
                     Size = UDim2.new(0, 12, 0, 12),
                     Text = "",
-                    BorderSizePixel = 0
+                    BorderSizePixel = 0,
+                    ZIndex = 17
                 })
                 
                 local UICornerSliderButton = CreateInstance("UICorner", {
@@ -802,7 +906,8 @@ function CLANKLib:CreateWindow(title)
                     Name = buttonName .. "Button",
                     Parent = SectionContent,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 30)
+                    Size = UDim2.new(1, 0, 0, 30),
+                    ZIndex = 15
                 })
                 
                 local Button = CreateInstance("TextButton", {
@@ -815,8 +920,12 @@ function CLANKLib:CreateWindow(title)
                     TextColor3 = Colors.Text,
                     TextSize = 14,
                     BorderSizePixel = 0,
-                    AutoButtonColor = false
+                    AutoButtonColor = false,
+                    ZIndex = 15
                 })
+                
+                local ButtonShadow = CreateShadow(Button, 10, 0.7)
+                ButtonShadow.ZIndex = 14
                 
                 local UICornerButton = CreateInstance("UICorner", {
                     Parent = Button,
@@ -868,7 +977,8 @@ function CLANKLib:CreateWindow(title)
                     Parent = SectionContent,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(1, 0, 0, 60),
-                    ClipsDescendants = true
+                    ClipsDescendants = true,
+                    ZIndex = 15
                 })
                 
                 local DropdownLabel = CreateInstance("TextLabel", {
@@ -881,7 +991,8 @@ function CLANKLib:CreateWindow(title)
                     Text = dropdownName,
                     TextColor3 = Colors.Text,
                     TextSize = 14,
-                    TextXAlignment = Enum.TextXAlignment.Left
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    ZIndex = 15
                 })
                 
                 local DropdownButton = CreateInstance("TextButton", {
@@ -895,8 +1006,12 @@ function CLANKLib:CreateWindow(title)
                     TextColor3 = Colors.Text,
                     TextSize = 14,
                     BorderSizePixel = 0,
-                    TextXAlignment = Enum.TextXAlignment.Left
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    ZIndex = 15
                 })
+                
+                local DropdownShadow = CreateShadow(DropdownButton, 10, 0.7)
+                DropdownShadow.ZIndex = 14
                 
                 local UICornerDropdown = CreateInstance("UICorner", {
                     Parent = DropdownButton,
@@ -910,7 +1025,8 @@ function CLANKLib:CreateWindow(title)
                     Position = UDim2.new(1, -25, 0.5, -8),
                     Size = UDim2.new(0, 16, 0, 16),
                     Image = "rbxassetid://7072706663", -- Down arrow icon
-                    ImageColor3 = Colors.Text
+                    ImageColor3 = Colors.Text,
+                    ZIndex = 16
                 })
                 
                 local DropdownContent = CreateInstance("Frame", {
@@ -921,8 +1037,11 @@ function CLANKLib:CreateWindow(title)
                     Size = UDim2.new(1, 0, 0, 0),
                     Visible = false,
                     BorderSizePixel = 0,
-                    ZIndex = 5
+                    ZIndex = 17
                 })
+                
+                local DropdownContentShadow = CreateShadow(DropdownContent, 10, 0.7)
+                DropdownContentShadow.ZIndex = 16
                 
                 local UICornerContent = CreateInstance("UICorner", {
                     Parent = DropdownContent,
@@ -964,7 +1083,7 @@ function CLANKLib:CreateWindow(title)
                         TextColor3 = Colors.Text,
                         TextSize = 14,
                         TextXAlignment = Enum.TextXAlignment.Left,
-                        ZIndex = 6
+                        ZIndex = 18
                     })
                     
                     OptionButton.MouseButton1Click:Connect(function()
