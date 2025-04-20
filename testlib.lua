@@ -746,7 +746,7 @@ function CLANKLib:CreateWindow(title)
                 
                 local DropdownButton = CreateInstance("TextButton", {
                     Name = "DropdownButton",
-                    Parent = DropdownFrame,  {
+                    Parent = DropdownFrame,
                     Name = "DropdownButton",
                     Parent = DropdownFrame,
                     BackgroundColor3 = TERTIARY_COLOR,
