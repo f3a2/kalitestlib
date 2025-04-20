@@ -732,35 +732,33 @@ function CLANKLib:CreateWindow(title)
                     ZIndex = 15
                 })
                 
-                local SliderLabel = CreateInstance("TextLabel", {
-                    Name = "SliderLabel",
-                    Parent = Slider  {
-                    Name = "SliderLabel",
-                    Parent = SliderFrame,
-                    BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 0, 0, 0),
-                    Size = UDim2.new(1, -50, 0, 20),
-                    Font = Enum.Font.Gotham,
-                    Text = sliderName,
-                    TextColor3 = Colors.Text,
-                    TextSize = 14,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    ZIndex = 15
-                })
-                
-                local ValueLabel = CreateInstance("TextLabel", {
-                    Name = "ValueLabel",
-                    Parent = SliderFrame,
-                    BackgroundTransparency = 1,
-                    Position = UDim2.new(1, -40, 0, 0),
-                    Size = UDim2.new(0, 40, 0, 20),
-                    Font = Enum.Font.Gotham,
-                    Text = tostring(defaultValue),
-                    TextColor3 = Colors.Text,
-                    TextSize = 14,
-                    TextXAlignment = Enum.TextXAlignment.Right,
-                    ZIndex = 15
-                })
+local SliderLabel = CreateInstance("TextLabel", {
+    Name = "SliderLabel",
+    Parent = SliderFrame,  -- Fixed: Removed the extra { and set Parent correctly
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0, 0, 0, 0),
+    Size = UDim2.new(1, -50, 0, 20),
+    Font = Enum.Font.Gotham,
+    Text = sliderName,
+    TextColor3 = Colors.Text,
+    TextSize = 14,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 15                
+})
+
+local ValueLabel = CreateInstance("TextLabel", {
+    Name = "ValueLabel",
+    Parent = SliderFrame,
+    BackgroundTransparency = 1,
+    Position = UDim2.new(1, -40, 0, 0),
+    Size = UDim2.new(0, 40, 0, 20),
+    Font = Enum.Font.Gotham,
+    Text = tostring(defaultValue),
+    TextColor3 = Colors.Text,
+    TextSize = 14,
+    TextXAlignment = Enum.TextXAlignment.Right,
+    ZIndex = 15
+})
                 
                 local SliderBackground = CreateInstance("Frame", {
                     Name = "SliderBackground",
