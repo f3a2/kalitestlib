@@ -746,7 +746,7 @@ function CLANKLib:CreateWindow(title)
                 
                 local DropdownButton = CreateInstance("TextButton", {
                     Name = "DropdownButton",
-                    Parent = DropdownFrame,  {
+                    Parent = DropdownFrame,
                     Name = "DropdownButton",
                     Parent = DropdownFrame,
                     BackgroundColor3 = TERTIARY_COLOR,
@@ -759,7 +759,7 @@ function CLANKLib:CreateWindow(title)
                     BorderSizePixel = 0,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
-                
+
                 local UICornerDropdown = CreateInstance("UICorner", {
                     Parent = DropdownButton,
                     CornerRadius = UDim.new(0, 4)
